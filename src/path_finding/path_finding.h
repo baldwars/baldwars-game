@@ -1,7 +1,3 @@
-//
-// Created by anton on 05/06/2021.
-//
-
 #ifndef UNTITLED_PATH_FINDING_H
 #define UNTITLED_PATH_FINDING_H
 

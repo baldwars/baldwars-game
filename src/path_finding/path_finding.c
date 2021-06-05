@@ -1,7 +1,3 @@
-//
-// Created by anton on 05/06/2021.
-//
-
 #include "path_finding.h"
 
 HashTable *breadth_first_search(Graph graph, Node *start, Node *goal)
@@ -63,7 +59,7 @@ Nodes *neighbors_of(Node *origin, Nodes *nodes, unsigned short include_diagonals
 Directions *get_directions(unsigned short include_diagonals)
 {
     unsigned short direction_possibilities = include_diagonals == 0 ? 4 : 8;
-    Directions *directions = directions_init_alloc(direction_possibilities);
+    Directions *directions = directions_init();
 
     for (int i = 0; i < direction_possibilities; ++i) {
         Direction *direction;

@@ -1,8 +1,4 @@
-//
-// Created by anton on 05/06/2021.
-//
-
-#include "stdio.h"
+#include <stdio.h>
 #include "utils.h"
 
 Edge edge_init(Node from, Node to, size_t weight)
@@ -332,4 +328,83 @@ void print_hash_table(HashTable *hash_table)
 
         printf("\n");
     }
+}
+
+PQItem *pq_item_init(Node *value, int priority)
+{
+    PQItem *item = malloc(sizeof(PQItem));
+
+    if (item == NULL) return NULL;
+
+    *item = (PQItem){
+        .value = value,
+        .priority = priority
+    };
+
+    return item;
+}
+
+PriorityQueue *priority_queue_init()
+{
+    return priority_queue_init_alloc(1);
+}
+
+PriorityQueue *priority_queue_init_alloc(size_t capacity)
+{
+    PriorityQueue *queue = malloc(sizeof(PriorityQueue));
+    *queue = (PriorityQueue){
+        .length = 0,
+        .capacity = capacity,
+        .items = malloc(sizeof(PQItem *))
+    };
+    return queue;
+}
+
+void priority_queue_check_alloc(PriorityQueue *queue)
+{
+    if (queue->length >= queue->capacity)
+    {
+        queue-> capacity += (queue->capacity < CAPACITY_LIMIT) ? queue->capacity : CAPACITY_LIMIT;
+        queue->items = realloc(queue->items, (sizeof(PQItem *) * queue->capacity));
+    }
+}
+
+size_t priority_queue_peek(PriorityQueue *queue)
+{
+    int highest_priority = INT_MIN;
+    int index = -1;
+
+    for (int i = 0; i <= queue->length; ++i) {
+        if ((highest_priority == queue->items[i]->priority
+            && index >= 0
+            && hash_node(queue->items[index]->value) > hash_node(queue->items[i]->value))
+            || (highest_priority < queue->items[i]->priority))
+        {
+            highest_priority = queue->items[i]->priority;
+            index = i;
+        }
+    }
+
+    return index;
+}
+
+void priority_queue_enqueue(PriorityQueue *queue, PQItem *value)
+{
+    priority_queue_check_alloc(queue);
+    queue->items[queue->length++] = value;
+}
+
+Node *priority_queue_dequeue(PriorityQueue *queue)
+{
+    size_t index = priority_queue_peek(queue);
+    Node *node = queue->items[index]->value;
+
+    for (size_t i = index; i < queue->length - 1; ++i)
+    {
+        queue->items[i] = queue->items[i + 1];
+    }
+
+    queue->length--;
+
+    return node;
 }
