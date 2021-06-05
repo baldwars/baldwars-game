@@ -1,7 +1,4 @@
-//
-// Created by anton on 05/06/2021.
-//
-
+#include <stdio.h>
 #include "path_finding.h"
 
 HashTable *breadth_first_search(Graph graph, Node *start, Node *goal)
@@ -11,7 +8,7 @@ HashTable *breadth_first_search(Graph graph, Node *start, Node *goal)
     HashTable *came_from = hash_table_init();
     hash_table_set_entry(came_from, start, NULL);
 
-    while (!is_empty(frontier_queue))
+    while (!nodes_is_empty(frontier_queue))
     {
         Node *current = nodes_dequeue(frontier_queue);
         if (nodes_are_equals(current, goal))
@@ -23,7 +20,7 @@ HashTable *breadth_first_search(Graph graph, Node *start, Node *goal)
         for (int i = 0; i < neighbors->length; ++i)
         {
             Node *neighbor = neighbors->items[i];
-            if (hash_table_get_entry_by_key(came_from, neighbor) == NULL)
+            if (hash_table_get_entry_value_by_key(came_from, neighbor) == NULL)
             {
                 nodes_push_back(frontier_queue, neighbor);
                 hash_table_set_entry(came_from, neighbor, current);
@@ -32,6 +29,56 @@ HashTable *breadth_first_search(Graph graph, Node *start, Node *goal)
     }
 
     return came_from;
+}
+
+void dijkstra_search(Graph graph, Node *start, Node *goal, HashTable *came_from, HashTable *cost_so_far)
+{
+    PriorityQueue *frontier = priority_queue_init();
+    priority_queue_enqueue(frontier, pq_item_init(start, 0));
+
+    int priority_start = 0;
+    hash_table_set_entry(came_from, start, NULL);
+    hash_table_set_entry(cost_so_far, start, &priority_start);
+
+    while (!priority_queue_is_empty(frontier))
+    {
+        Node *current = priority_queue_dequeue(frontier);
+
+        if (nodes_are_equals(current, goal))
+        {
+            break;
+        }
+
+        Nodes *neighbors = neighbors_of(current, graph.nodes, DIRECTION_NO_DIAGONALS);
+        for (int i = 0; i < neighbors->length; ++i) {
+            Node *neighbor = neighbors->items[i];
+            int *current_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, current);
+            int *neighbor_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, neighbor);
+            int new_cost = *current_cost + 1;
+
+            if (neighbor_cost == NULL || new_cost < *neighbor_cost)
+            {
+                hash_table_set_entry(cost_so_far, neighbor, &new_cost);
+                hash_table_set_entry(came_from, neighbor, current);
+                priority_queue_enqueue(frontier, pq_item_init(neighbor, new_cost));
+            }
+        }
+    }
+}
+
+Nodes *reconstruct_path(HashTable *came_from, Node *start, Node *goal)
+{
+    Nodes *path = nodes_init();
+    Node *current = goal;
+    while (!nodes_are_equals(current, start))
+    {
+        nodes_push_back(path, current);
+        current = (Node *)hash_table_get_entry_value_by_key(came_from, current);
+    }
+
+    nodes_push_back(path, start);
+
+    return nodes_reverse(path);
 }
 
 Nodes *neighbors_of(Node *origin, Nodes *nodes, unsigned short include_diagonals)
@@ -63,7 +110,7 @@ Nodes *neighbors_of(Node *origin, Nodes *nodes, unsigned short include_diagonals
 Directions *get_directions(unsigned short include_diagonals)
 {
     unsigned short direction_possibilities = include_diagonals == 0 ? 4 : 8;
-    Directions *directions = directions_init_alloc(direction_possibilities);
+    Directions *directions = directions_init();
 
     for (int i = 0; i < direction_possibilities; ++i) {
         Direction *direction;

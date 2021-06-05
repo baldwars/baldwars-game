@@ -1,7 +1,3 @@
-//
-// Created by anton on 05/06/2021.
-//
-
 #ifndef UNTITLED_PATH_FINDING_H
 #define UNTITLED_PATH_FINDING_H
 
@@ -25,7 +21,11 @@ struct directions_t {
     size_t capacity;
 };
 
+Nodes *reconstruct_path(HashTable *, Node *, Node *);
+
 HashTable *breadth_first_search(Graph, Node *, Node *);
+void dijkstra_search(Graph, Node *, Node *, HashTable *, HashTable *);
+
 Nodes *neighbors_of(Node *, Nodes *, unsigned short);
 Directions *get_directions(unsigned short);
 Direction *direction_init(short, short);

@@ -1,8 +1,4 @@
-//
-// Created by anton on 05/06/2021.
-//
-
-#include "stdio.h"
+#include <stdio.h>
 #include "utils.h"
 
 Edge edge_init(Node from, Node to, size_t weight)
@@ -95,7 +91,10 @@ void nodes_push_back(Nodes *nodes, Node *value)
 
 unsigned short nodes_are_equals(Node *a, Node *b)
 {
-    return (a->x == b->x) && (a->y == b->y);
+    return (a->x == b->x)
+        && (a->y == b->y)
+        && (a->is_obstacle == b->is_obstacle)
+        && (a->is_entity == b->is_entity);
 }
 
 int nodes_includes(Nodes *nodes, Node *value)
@@ -107,6 +106,18 @@ int nodes_includes(Nodes *nodes, Node *value)
             return 1;
     }
     return 0;
+}
+
+Nodes *nodes_reverse(Nodes *nodes)
+{
+    Nodes *reversed = nodes_init_alloc(nodes->capacity);
+    size_t last_index = nodes->length - 1;
+
+    for (int i = (int)last_index; i >= 0; --i) {
+        nodes_push_back(reversed, nodes->items[i]);
+    }
+
+    return reversed;
 }
 
 Graph graph_init_alloc(size_t nodes_capacity, size_t edges_capacity)
@@ -162,22 +173,23 @@ Nodes *convert_grid_to_nodes(int **grid, size_t rows, size_t columns)
 
 void print_nodes(Nodes *nodes)
 {
-    printf("graph nodes: \n[\n");
+    printf("nodes: \n[\n");
     for (int i = 0; i < nodes->length; ++i) {
         Node *node = nodes->items[i];
-        printf("  { x: %d, y: %d , is_obstacle: %d, is_entity: %d }\n", node->x, node->y, node->is_obstacle, node->is_entity);
+        printf("  { x: %d, y: %d , is_obstacle: %d, is_entity: %d }\n",
+               node->x, node->y, node->is_obstacle, node->is_entity);
     }
     printf("]\n");
 }
 
-unsigned short is_empty(Nodes *nodes)
+unsigned short nodes_is_empty(Nodes *nodes)
 {
     return nodes->length == 0;
 }
 
 Node *nodes_dequeue(Nodes *nodes)
 {
-    if (is_empty(nodes)) {
+    if (nodes_is_empty(nodes)) {
         return NULL;
     }
 
@@ -198,7 +210,7 @@ unsigned int hash_node(Node *node)
     return hash;
 }
 
-Entry *entry_init(Node *key, Node *value)
+Entry *entry_init(Node *key, void *value)
 {
     Entry *entry = malloc(sizeof(Entry));
     entry->key = key;
@@ -221,7 +233,7 @@ HashTable *hash_table_init()
     return hash_table;
 }
 
-void hash_table_set_entry(HashTable *hashtable, Node *key, Node *value)
+void hash_table_set_entry(HashTable *hashtable, Node *key, void *value)
 {
     unsigned int slot = hash_node(key);
     Entry *entry = hashtable->entries[slot];
@@ -245,7 +257,7 @@ void hash_table_set_entry(HashTable *hashtable, Node *key, Node *value)
     prev->next = entry_init(key, value);
 }
 
-Node *hash_table_get_entry_by_key(HashTable *hashtable, Node *key)
+void *hash_table_get_entry_value_by_key(HashTable *hashtable, Node *key)
 {
     unsigned int slot = hash_node(key);
     Entry *entry = hashtable->entries[slot];
@@ -306,7 +318,7 @@ void hash_table_delete_entry_by_key(HashTable *hashtable, Node *key)
     }
 }
 
-void print_hash_table(HashTable *hash_table)
+void print_nodes_hash_table(HashTable *hash_table)
 {
     for (int i = 0; i < HASH_TABLE_CAPACITY; ++i) {
         Entry *entry = hash_table->entries[i];
@@ -315,21 +327,114 @@ void print_hash_table(HashTable *hash_table)
             continue;
         }
 
-        printf("slot[%d]: ", i);
+        printf("slot[%4d]: ", i);
 
-        for(;;) {
-            if (entry->value == NULL) {
-                printf("{ %d, %d, %d, %d } = NULL", entry->key->x, entry->key->y, entry->key->is_obstacle, entry->key->is_entity);
-            } else {
-                printf("{ %d, %d, %d, %d } = { %d, %d, %hu, %hu } ", entry->key->x, entry->key->y, entry->key->is_obstacle, entry->key->is_entity, entry->value->x, entry->value->y, entry->value->is_obstacle, entry->value->is_entity);
+        for(;;)
+        {
+            Node *key = entry->key;
+            if (entry->value == NULL)
+            {
+                printf("{ %d, %d, %d, %d } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
             }
-            if (entry->next == NULL) {
+            else
+            {
+                Node *value = (Node *)entry->value;
+                printf("{ %d, %d, %d, %d } = { %d, %d, %hu, %hu } ",
+                       key->x, key->y, key->is_obstacle, key->is_entity,
+                       value->x, value->y, value->is_obstacle, value->is_entity);
+            }
+
+            if (entry->next == NULL)
+            {
                 break;
             }
 
             entry = entry->next;
         }
-
         printf("\n");
     }
+}
+
+PQItem *pq_item_init(Node *value, int priority)
+{
+    PQItem *item = malloc(sizeof(PQItem));
+
+    if (item == NULL) return NULL;
+
+    *item = (PQItem){
+        .value = value,
+        .priority = priority
+    };
+
+    return item;
+}
+
+PriorityQueue *priority_queue_init()
+{
+    return priority_queue_init_alloc(1);
+}
+
+PriorityQueue *priority_queue_init_alloc(size_t capacity)
+{
+    PriorityQueue *queue = malloc(sizeof(PriorityQueue));
+    *queue = (PriorityQueue){
+        .length = 0,
+        .capacity = capacity,
+        .items = malloc(sizeof(PQItem *))
+    };
+    return queue;
+}
+
+void priority_queue_check_alloc(PriorityQueue *queue)
+{
+    if (queue->length >= queue->capacity)
+    {
+        queue-> capacity += (queue->capacity < CAPACITY_LIMIT) ? queue->capacity : CAPACITY_LIMIT;
+        queue->items = realloc(queue->items, (sizeof(PQItem *) * queue->capacity));
+    }
+}
+
+size_t priority_queue_peek(PriorityQueue *queue)
+{
+    int highest_priority = INT_MIN;
+    int index = -1;
+
+    for (int i = 0; i < queue->length; ++i) {
+        if ((highest_priority == queue->items[i]->priority
+            && index >= 0
+            && hash_node(queue->items[index]->value) > hash_node(queue->items[i]->value))
+            || (highest_priority < queue->items[i]->priority))
+        {
+            highest_priority = queue->items[i]->priority;
+            index = i;
+        }
+    }
+
+    return index;
+}
+
+void priority_queue_enqueue(PriorityQueue *queue, PQItem *value)
+{
+    priority_queue_check_alloc(queue);
+    queue->items[queue->length++] = value;
+}
+
+Node *priority_queue_dequeue(PriorityQueue *queue)
+{
+    size_t index = priority_queue_peek(queue);
+    Node *node = queue->items[index]->value;
+
+    for (size_t i = index; i < queue->length - 1; ++i)
+    {
+        queue->items[i] = queue->items[i + 1];
+    }
+
+    queue->length--;
+
+    return node;
+}
+
+unsigned short priority_queue_is_empty(PriorityQueue *queue)
+{
+    return queue->length == 0;
 }
