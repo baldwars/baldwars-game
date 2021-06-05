@@ -21,8 +21,10 @@ struct directions_t {
     size_t capacity;
 };
 
+Nodes *reconstruct_path(HashTable *, Node *, Node *);
+
 HashTable *breadth_first_search(Graph, Node *, Node *);
-//void dijkstra_search(Graph, Node *, Node *, HashTable *, )
+void dijkstra_search(Graph, Node *, Node *, HashTable *, HashTable *);
 
 Nodes *neighbors_of(Node *, Nodes *, unsigned short);
 Directions *get_directions(unsigned short);

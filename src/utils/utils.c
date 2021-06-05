@@ -91,7 +91,10 @@ void nodes_push_back(Nodes *nodes, Node *value)
 
 unsigned short nodes_are_equals(Node *a, Node *b)
 {
-    return (a->x == b->x) && (a->y == b->y);
+    return (a->x == b->x)
+        && (a->y == b->y)
+        && (a->is_obstacle == b->is_obstacle)
+        && (a->is_entity == b->is_entity);
 }
 
 int nodes_includes(Nodes *nodes, Node *value)
@@ -103,6 +106,18 @@ int nodes_includes(Nodes *nodes, Node *value)
             return 1;
     }
     return 0;
+}
+
+Nodes *nodes_reverse(Nodes *nodes)
+{
+    Nodes *reversed = nodes_init_alloc(nodes->capacity);
+    size_t last_index = nodes->length - 1;
+
+    for (int i = (int)last_index; i >= 0; --i) {
+        nodes_push_back(reversed, nodes->items[i]);
+    }
+
+    return reversed;
 }
 
 Graph graph_init_alloc(size_t nodes_capacity, size_t edges_capacity)
@@ -158,22 +173,23 @@ Nodes *convert_grid_to_nodes(int **grid, size_t rows, size_t columns)
 
 void print_nodes(Nodes *nodes)
 {
-    printf("graph nodes: \n[\n");
+    printf("nodes: \n[\n");
     for (int i = 0; i < nodes->length; ++i) {
         Node *node = nodes->items[i];
-        printf("  { x: %d, y: %d , is_obstacle: %d, is_entity: %d }\n", node->x, node->y, node->is_obstacle, node->is_entity);
+        printf("  { x: %d, y: %d , is_obstacle: %d, is_entity: %d }\n",
+               node->x, node->y, node->is_obstacle, node->is_entity);
     }
     printf("]\n");
 }
 
-unsigned short is_empty(Nodes *nodes)
+unsigned short nodes_is_empty(Nodes *nodes)
 {
     return nodes->length == 0;
 }
 
 Node *nodes_dequeue(Nodes *nodes)
 {
-    if (is_empty(nodes)) {
+    if (nodes_is_empty(nodes)) {
         return NULL;
     }
 
@@ -195,7 +211,6 @@ unsigned int hash_node(Node *node)
 }
 
 Entry *entry_init(Node *key, void *value)
-//Entry *entry_init(Node *key, Node *value)
 {
     Entry *entry = malloc(sizeof(Entry));
     entry->key = key;
@@ -219,7 +234,6 @@ HashTable *hash_table_init()
 }
 
 void hash_table_set_entry(HashTable *hashtable, Node *key, void *value)
-//void hash_table_set_entry(HashTable *hashtable, Node *key, Node *value)
 {
     unsigned int slot = hash_node(key);
     Entry *entry = hashtable->entries[slot];
@@ -243,8 +257,7 @@ void hash_table_set_entry(HashTable *hashtable, Node *key, void *value)
     prev->next = entry_init(key, value);
 }
 
-void *hash_table_get_entry_by_key(HashTable *hashtable, Node *key)
-//Node *hash_table_get_entry_by_key(HashTable *hashtable, Node *key)
+void *hash_table_get_entry_value_by_key(HashTable *hashtable, Node *key)
 {
     unsigned int slot = hash_node(key);
     Entry *entry = hashtable->entries[slot];
@@ -316,23 +329,28 @@ void print_nodes_hash_table(HashTable *hash_table)
 
         printf("slot[%4d]: ", i);
 
-        for(;;) {
+        for(;;)
+        {
             Node *key = entry->key;
-            if (entry->value == NULL) {
+            if (entry->value == NULL)
+            {
                 printf("{ %d, %d, %d, %d } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
-            } else {
+            }
+            else
+            {
                 Node *value = (Node *)entry->value;
                 printf("{ %d, %d, %d, %d } = { %d, %d, %hu, %hu } ",
                        key->x, key->y, key->is_obstacle, key->is_entity,
                        value->x, value->y, value->is_obstacle, value->is_entity);
             }
-            if (entry->next == NULL) {
+
+            if (entry->next == NULL)
+            {
                 break;
             }
 
             entry = entry->next;
         }
-
         printf("\n");
     }
 }
@@ -381,7 +399,7 @@ size_t priority_queue_peek(PriorityQueue *queue)
     int highest_priority = INT_MIN;
     int index = -1;
 
-    for (int i = 0; i <= queue->length; ++i) {
+    for (int i = 0; i < queue->length; ++i) {
         if ((highest_priority == queue->items[i]->priority
             && index >= 0
             && hash_node(queue->items[index]->value) > hash_node(queue->items[i]->value))
@@ -414,4 +432,9 @@ Node *priority_queue_dequeue(PriorityQueue *queue)
     queue->length--;
 
     return node;
+}
+
+unsigned short priority_queue_is_empty(PriorityQueue *queue)
+{
+    return queue->length == 0;
 }

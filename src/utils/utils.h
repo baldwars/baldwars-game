@@ -49,7 +49,6 @@ struct graph_t {
 struct entry_t {
     Node *key;
     void *value;
-//    Node *value;
     Entry *next;
 };
 
@@ -78,7 +77,8 @@ unsigned short nodes_are_equals(Node *, Node *);
 int nodes_includes(Nodes *, Node *);
 int nodes_index_of(Nodes *, int, int);
 void print_nodes(Nodes *);
-unsigned short is_empty(Nodes *);
+unsigned short nodes_is_empty(Nodes *);
+Nodes *nodes_reverse(Nodes *);
 
 // EDGES
 Edge edge_init(Node, Node, size_t);
@@ -97,12 +97,9 @@ unsigned int hash_node(Node *);
 
 // HASH TABLE
 Entry *entry_init(Node *, void *);
-//Entry *entry_init(Node *, Node *);
 HashTable *hash_table_init();
 void hash_table_set_entry(HashTable *, Node *, void *);
-//void hash_table_set_entry(HashTable *, Node *, Node *);
-void *hash_table_get_entry_by_key(HashTable *, Node *);
-//Node *hash_table_get_entry_by_key(HashTable *, Node *);
+void *hash_table_get_entry_value_by_key(HashTable *, Node *);
 void hash_table_delete_entry_by_key(HashTable *, Node *);
 void print_nodes_hash_table(HashTable *);
 
@@ -117,5 +114,6 @@ void priority_queue_check_alloc(PriorityQueue *);
 size_t priority_queue_peek(PriorityQueue *);
 void priority_queue_enqueue(PriorityQueue *, PQItem *);
 Node *priority_queue_dequeue(PriorityQueue *);
+unsigned short priority_queue_is_empty(PriorityQueue *);
 
 #endif //UNTITLED_UTILS_H

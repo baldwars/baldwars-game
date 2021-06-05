@@ -39,11 +39,21 @@ int main() {
     graph.nodes = convert_grid_to_nodes(grid, 5, 5);
     print_nodes(graph.nodes);
 
-    printf("\nPaths obtained from { 0, 0 }:\n");
-    Node *start = graph.nodes->items[0];
-    Node *goal = graph.nodes->items[13];
+    Node *start = graph.nodes->items[1]; // player
+    Node *goal = graph.nodes->items[19]; // enemy
+
     HashTable *ht = breadth_first_search(graph, start, goal);
+    printf("\nPath obtained from { 0, 1 } to { 3, 3 } with Breadth First:\n");
     print_nodes_hash_table(ht);
+
+    HashTable *came_from = hash_table_init();
+    HashTable *cost_so_far = hash_table_init();
+
+    dijkstra_search(graph, start, goal, came_from, cost_so_far);
+    Nodes *path = reconstruct_path(came_from, start, goal);
+
+    printf("\nPath obtained from { 0, 1 } to { 3, 3 } with Dijkstra:\n");
+    print_nodes(path);
 
     return 0;
 }
