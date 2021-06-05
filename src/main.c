@@ -43,7 +43,7 @@ int main() {
     Node *start = graph.nodes->items[0];
     Node *goal = graph.nodes->items[13];
     HashTable *ht = breadth_first_search(graph, start, goal);
-    print_hash_table(ht);
+    print_nodes_hash_table(ht);
 
     return 0;
 }

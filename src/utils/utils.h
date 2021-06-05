@@ -48,7 +48,8 @@ struct graph_t {
 
 struct entry_t {
     Node *key;
-    Node *value;
+    void *value;
+//    Node *value;
     Entry *next;
 };
 
@@ -95,12 +96,15 @@ Nodes *convert_grid_to_nodes(int **, size_t, size_t);
 unsigned int hash_node(Node *);
 
 // HASH TABLE
-Entry *entry_init(Node *, Node *);
+Entry *entry_init(Node *, void *);
+//Entry *entry_init(Node *, Node *);
 HashTable *hash_table_init();
-void hash_table_set_entry(HashTable *, Node *, Node *);
-Node *hash_table_get_entry_by_key(HashTable *, Node *);
+void hash_table_set_entry(HashTable *, Node *, void *);
+//void hash_table_set_entry(HashTable *, Node *, Node *);
+void *hash_table_get_entry_by_key(HashTable *, Node *);
+//Node *hash_table_get_entry_by_key(HashTable *, Node *);
 void hash_table_delete_entry_by_key(HashTable *, Node *);
-void print_hash_table(HashTable *);
+void print_nodes_hash_table(HashTable *);
 
 // QUEUE
 Node *nodes_dequeue(Nodes *);

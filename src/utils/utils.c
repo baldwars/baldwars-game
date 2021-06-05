@@ -194,7 +194,8 @@ unsigned int hash_node(Node *node)
     return hash;
 }
 
-Entry *entry_init(Node *key, Node *value)
+Entry *entry_init(Node *key, void *value)
+//Entry *entry_init(Node *key, Node *value)
 {
     Entry *entry = malloc(sizeof(Entry));
     entry->key = key;
@@ -217,7 +218,8 @@ HashTable *hash_table_init()
     return hash_table;
 }
 
-void hash_table_set_entry(HashTable *hashtable, Node *key, Node *value)
+void hash_table_set_entry(HashTable *hashtable, Node *key, void *value)
+//void hash_table_set_entry(HashTable *hashtable, Node *key, Node *value)
 {
     unsigned int slot = hash_node(key);
     Entry *entry = hashtable->entries[slot];
@@ -241,7 +243,8 @@ void hash_table_set_entry(HashTable *hashtable, Node *key, Node *value)
     prev->next = entry_init(key, value);
 }
 
-Node *hash_table_get_entry_by_key(HashTable *hashtable, Node *key)
+void *hash_table_get_entry_by_key(HashTable *hashtable, Node *key)
+//Node *hash_table_get_entry_by_key(HashTable *hashtable, Node *key)
 {
     unsigned int slot = hash_node(key);
     Entry *entry = hashtable->entries[slot];
@@ -302,7 +305,7 @@ void hash_table_delete_entry_by_key(HashTable *hashtable, Node *key)
     }
 }
 
-void print_hash_table(HashTable *hash_table)
+void print_nodes_hash_table(HashTable *hash_table)
 {
     for (int i = 0; i < HASH_TABLE_CAPACITY; ++i) {
         Entry *entry = hash_table->entries[i];
@@ -311,13 +314,17 @@ void print_hash_table(HashTable *hash_table)
             continue;
         }
 
-        printf("slot[%d]: ", i);
+        printf("slot[%4d]: ", i);
 
         for(;;) {
+            Node *key = entry->key;
             if (entry->value == NULL) {
-                printf("{ %d, %d, %d, %d } = NULL", entry->key->x, entry->key->y, entry->key->is_obstacle, entry->key->is_entity);
+                printf("{ %d, %d, %d, %d } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
             } else {
-                printf("{ %d, %d, %d, %d } = { %d, %d, %hu, %hu } ", entry->key->x, entry->key->y, entry->key->is_obstacle, entry->key->is_entity, entry->value->x, entry->value->y, entry->value->is_obstacle, entry->value->is_entity);
+                Node *value = (Node *)entry->value;
+                printf("{ %d, %d, %d, %d } = { %d, %d, %hu, %hu } ",
+                       key->x, key->y, key->is_obstacle, key->is_entity,
+                       value->x, value->y, value->is_obstacle, value->is_entity);
             }
             if (entry->next == NULL) {
                 break;

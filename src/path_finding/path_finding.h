@@ -22,6 +22,8 @@ struct directions_t {
 };
 
 HashTable *breadth_first_search(Graph, Node *, Node *);
+//void dijkstra_search(Graph, Node *, Node *, HashTable *, )
+
 Nodes *neighbors_of(Node *, Nodes *, unsigned short);
 Directions *get_directions(unsigned short);
 Direction *direction_init(short, short);
