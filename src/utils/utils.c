@@ -355,6 +355,42 @@ void print_nodes_hash_table(HashTable *hash_table)
     }
 }
 
+void print_int_hash_table(HashTable *hash_table)
+{
+    for (int i = 0; i < HASH_TABLE_CAPACITY; ++i) {
+        Entry *entry = hash_table->entries[i];
+
+        if (entry == NULL) {
+            continue;
+        }
+
+        printf("slot[%4d]: ", i);
+
+        for(;;)
+        {
+            Node *key = entry->key;
+            if (entry->value == NULL)
+            {
+                printf("{ %d, %d, %d, %d } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
+            }
+            else
+            {
+                int *value = (int *)entry->value;
+                printf("{ %d, %d, %d, %d } = %d\n",
+                       key->x, key->y, key->is_obstacle, key->is_entity, *value);
+            }
+
+            if (entry->next == NULL)
+            {
+                break;
+            }
+
+            entry = entry->next;
+        }
+        printf("\n");
+    }
+}
+
 PQItem *pq_item_init(Node *value, int priority)
 {
     PQItem *item = malloc(sizeof(PQItem));
@@ -396,16 +432,24 @@ void priority_queue_check_alloc(PriorityQueue *queue)
 
 size_t priority_queue_peek(PriorityQueue *queue)
 {
-    int highest_priority = INT_MIN;
+    int lowest_priority = INT_MAX;
+//    int highest_priority = INT_MIN;
     int index = -1;
 
     for (int i = 0; i < queue->length; ++i) {
-        if ((highest_priority == queue->items[i]->priority
+        PQItem *item_i = queue->items[i];
+        PQItem *item_index = queue->items[index];
+        if ((lowest_priority == item_i->priority
+//        if ((highest_priority == item_i->priority
             && index >= 0
-            && hash_node(queue->items[index]->value) > hash_node(queue->items[i]->value))
-            || (highest_priority < queue->items[i]->priority))
+//            && item_i
+//            && hash_node(queue->items[index]->value) < hash_node(queue->items[i]->value)
+            )
+            || (lowest_priority > item_i->priority))
+//            || (highest_priority < item_i->priority))
         {
-            highest_priority = queue->items[i]->priority;
+            lowest_priority = queue->items[i]->priority;
+//            highest_priority = queue->items[i]->priority;
             index = i;
         }
     }

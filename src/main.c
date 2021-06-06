@@ -40,20 +40,29 @@ int main() {
     print_nodes(graph.nodes);
 
     Node *start = graph.nodes->items[1]; // player
-    Node *goal = graph.nodes->items[19]; // enemy
+    Node *goal = graph.nodes->items[18]; // enemy
 
     HashTable *ht = breadth_first_search(graph, start, goal);
     printf("\nPath obtained from { 0, 1 } to { 3, 3 } with Breadth First:\n");
     print_nodes_hash_table(ht);
 
-    HashTable *came_from = hash_table_init();
-    HashTable *cost_so_far = hash_table_init();
+    HashTable *d_came_from = hash_table_init();
+    HashTable *d_cost_so_far = hash_table_init();
 
-    dijkstra_search(graph, start, goal, came_from, cost_so_far);
-    Nodes *path = reconstruct_path(came_from, start, goal);
+    dijkstra_search(graph, start, goal, d_came_from, d_cost_so_far);
+    Nodes *d_path = reconstruct_path(d_came_from, start, goal);
 
     printf("\nPath obtained from { 0, 1 } to { 3, 3 } with Dijkstra:\n");
-    print_nodes(path);
+    print_nodes(d_path);
+
+    HashTable *a_came_from = hash_table_init();
+    HashTable *a_cost_so_far = hash_table_init();
+
+    a_star_search(graph, start, goal, a_came_from, a_cost_so_far);
+    Nodes *a_path = reconstruct_path(a_came_from, start, goal);
+
+    printf("\nPath obtained from { 0, 1 } to { 3, 3 } with A*:\n");
+    print_nodes(a_path);
 
     return 0;
 }

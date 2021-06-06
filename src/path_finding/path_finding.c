@@ -66,6 +66,43 @@ void dijkstra_search(Graph graph, Node *start, Node *goal, HashTable *came_from,
     }
 }
 
+void a_star_search(Graph graph, Node *start, Node *goal, HashTable *came_from, HashTable *cost_so_far)
+{
+    PriorityQueue *frontier = priority_queue_init();
+    priority_queue_enqueue(frontier, pq_item_init(start, 0));
+
+    int priority_start = 0;
+    hash_table_set_entry(came_from, start, start);
+    hash_table_set_entry(cost_so_far, start, &priority_start);
+
+
+    while (!priority_queue_is_empty(frontier))
+    {
+        Node *current = priority_queue_dequeue(frontier);
+
+        if (nodes_are_equals(current, goal))
+        {
+            break;
+        }
+
+        int *current_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, current);
+        Nodes *neighbors = neighbors_of(current, graph.nodes, DIRECTION_NO_DIAGONALS);
+        for (int i = 0; i < neighbors->length; ++i) {
+            Node *neighbor = neighbors->items[i];
+            int *neighbor_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, neighbor);
+            int new_cost = *current_cost + 1;
+
+            if (neighbor_cost == NULL || new_cost < *neighbor_cost)
+            {
+                hash_table_set_entry(cost_so_far, neighbor, &new_cost);
+                int priority = new_cost + heuristic(neighbor, goal);
+                priority_queue_enqueue(frontier, pq_item_init(neighbor, priority));
+                hash_table_set_entry(came_from, neighbor, current);
+            }
+        }
+    }
+}
+
 Nodes *reconstruct_path(HashTable *came_from, Node *start, Node *goal)
 {
     Nodes *path = nodes_init();
@@ -79,6 +116,11 @@ Nodes *reconstruct_path(HashTable *came_from, Node *start, Node *goal)
     nodes_push_back(path, start);
 
     return nodes_reverse(path);
+}
+
+int heuristic(Node *a, Node *b)
+{
+    return abs(a->x - b->x) + abs(a->y - b->y);
 }
 
 Nodes *neighbors_of(Node *origin, Nodes *nodes, unsigned short include_diagonals)
