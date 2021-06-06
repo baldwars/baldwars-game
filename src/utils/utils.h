@@ -102,6 +102,7 @@ void hash_table_set_entry(HashTable *, Node *, void *);
 void *hash_table_get_entry_value_by_key(HashTable *, Node *);
 void hash_table_delete_entry_by_key(HashTable *, Node *);
 void print_nodes_hash_table(HashTable *);
+void print_int_hash_table(HashTable *);
 
 // QUEUE
 Node *nodes_dequeue(Nodes *);
