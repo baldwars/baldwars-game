@@ -1,0 +1,5 @@
+### JETBRAINS ###
+.idea
+
+### CMAKE ###
+src/cmake-build-debug
