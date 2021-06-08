@@ -1,0 +1,8 @@
+//
+// Created by Latif on 07/06/2021.
+//
+
+#ifndef BALDWARS_GAME_GAME_FUNCTION_H
+#define BALDWARS_GAME_GAME_FUNCTION_H
+
+#endif //BALDWARS_GAME_GAME_FUNCTION_H

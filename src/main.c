@@ -4,7 +4,7 @@
 
 int main() {
     // Create grid
-    int **grid = malloc(sizeof(int *) * 5);
+    /*int **grid = malloc(sizeof(int *) * 5);
     for (int i = 0; i < 5; ++i) {
         grid[i] = malloc(sizeof(int) * 5);
     }
@@ -62,7 +62,7 @@ int main() {
     Nodes *a_path = reconstruct_path(a_came_from, start, goal);
 
     printf("\nPath obtained from { 0, 1 } to { 3, 3 } with A*:\n");
-    print_nodes(a_path);
+    print_nodes(a_path);*/
 
     return 0;
 }
