@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "path_finding/path_finding.h"
-#include ""
 
 int main() {
     // Create grid
@@ -26,7 +25,7 @@ int main() {
         }
     }
     // Display grid
-    /*printf("grid:\n");
+    printf("grid:\n");
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
             printf("%d ", grid[i][j]);
@@ -63,8 +62,7 @@ int main() {
     Nodes *a_path = reconstruct_path(a_came_from, start, goal);
 
     printf("\nPath obtained from { 0, 1 } to { 3, 3 } with A*:\n");
-    print_nodes(a_path);*/
-
+    print_nodes(a_path);
 
     return 0;
 }
