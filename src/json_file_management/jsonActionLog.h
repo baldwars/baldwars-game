@@ -7,6 +7,7 @@
 #include "../game_function/game_struct.h"
 #include "cJSON.h"
 
+cJSON *actions;
 void logMovement (cJSON *actions, Character player);
 void logAttack (cJSON *actions, int damage, Character target);
 void logDefence (cJSON *actions, Character *player);

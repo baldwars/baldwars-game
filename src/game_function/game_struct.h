@@ -29,5 +29,4 @@ struct Character {
 };
 
 
-
 #endif //BALDWARS_GAME_GAME_STRUCT_H

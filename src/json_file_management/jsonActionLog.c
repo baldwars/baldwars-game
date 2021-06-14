@@ -33,4 +33,7 @@ void logDefence (cJSON *actions, Character *player) {
     cJSON_AddItemToObject(actions, "defence log", defenceAction);
     cJSON *armor = cJSON_CreateNumber(player->armor);
     cJSON_AddItemToObject(defenceAction, "Player new armor amount", armor);
+
 }
+
+

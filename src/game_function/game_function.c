@@ -27,6 +27,7 @@ Character **players;
 Character *currentPlayer;
 int **map;
 
+
 const int TABSIZES[3] = {smallTABSIZE, mediumTABSIZE, largeTABSIZE};
 const int OBSTACLES[3] = {smallOBSTACLE, mediumOBSTACLE, largeOBSTACLE};
 
@@ -213,12 +214,14 @@ void attack (Character *target) {
         printf("target can't be hit");
     }
     else {
-        target->hp = target->hp - (weapon.damage - target->armor);
+        int damage = weapon.damage - target->armor;
+        target->hp = target->hp - (damage);
         printf("remaining hp %d", target->hp);
+        logAttack(actions, damage, *target);
     }
 }
 
-void defend (cJSON *actions) {
+void defend () {
     currentPlayer->armor = 5;
     logDefence(actions, currentPlayer);
 }
