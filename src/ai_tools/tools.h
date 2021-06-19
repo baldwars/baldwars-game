@@ -4,6 +4,7 @@
 #include "../game/game.h"
 
 // CELLS
+Cell *get_cell();
 Cell *get_cell_of(Warrior *);
 
 // MOVEMENTS
