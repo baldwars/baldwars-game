@@ -19,33 +19,33 @@ int turn = 0;
 int nbPlayers = 2;
 Character **players;
 Character *currentPlayer;
-int **map;
+int **map_;
 
 
 const int TABSIZES[3] = {smallTABSIZE, mediumTABSIZE, largeTABSIZE};
 const int OBSTACLES[3] = {smallOBSTACLE, mediumOBSTACLE, largeOBSTACLE};
 
 void initMap (int index) {
-    map = (int**)malloc(TABSIZES[index] * sizeof(int));
+    map_ = (int**)malloc(TABSIZES[index] * sizeof(int));
     printf("non \n");
     for (int i = 0; i < TABSIZES[index]; i++) {
         printf("oui");
-        map [i] = (int*) malloc(TABSIZES[index] * sizeof(int));
+        map_ [i] = (int*) malloc(TABSIZES[index] * sizeof(int));
     }
 }
 
 void deleteMap (int index) {
     for (int i = 0; i < TABSIZES[index]; i++) {
-        free (map[i]);
+        free (map_[i]);
     }
-    free(map);
+    free(map_);
 }
 
 void setupMap (int index) {
 
     for (int i = 0; i < TABSIZES[index]; i++) {
         for (int j = 0; j < TABSIZES[index]; j++) {
-            map[i][j] = 0;
+            map_[i][j] = 0;
         }
     }
 
@@ -54,16 +54,16 @@ void setupMap (int index) {
     int nbObs = (int) nbObsCalc;
 
     int pose2 = TABSIZES[index] - nbObs;
-    map[nbObs][nbObs] = 1;
-    map[pose2][pose2] = 1;
+    map_[nbObs][nbObs] = 1;
+    map_[pose2][pose2] = 1;
 
     srand(NULL);
     for (int k = 0; k < OBSTACLES[index]; k++) {
         do {
             i = rand() % 25;
             j = rand() % 25;
-        } while (map[i][j] != 0);
-        map[i][j] = -1;
+        } while (map_[i][j] != 0);
+        map_[i][j] = -1;
     }
 }
 
@@ -106,14 +106,14 @@ bool inRange (Character *target) {
 bool linearXObstacleCheck (int a, int b) {
     if (a < b) {
         for (int j = a; j < b; j++) {
-            if (map[currentPlayer->xPosition][j] == 1) {
+            if (map_[currentPlayer->xPosition][j] == 1) {
                 return true;
             }
         }
     }
     else if (a > b) {
         for (int j = b; j < a; j++) {
-            if (map[currentPlayer->xPosition][j] == 1) {
+            if (map_[currentPlayer->xPosition][j] == 1) {
                 return true;
             }
         }
@@ -127,7 +127,7 @@ bool linearXObstacleCheck (int a, int b) {
 bool linearYObstacleCheck (int a, int b) {
     if (a < b) {
         for (int i = a; i < b; i++) {
-            if (map[i][currentPlayer->yPosition] == 1) {
+            if (map_[i][currentPlayer->yPosition] == 1) {
                 return true;
             }
         }
@@ -135,7 +135,7 @@ bool linearYObstacleCheck (int a, int b) {
 
     else {
         for (int i = b; i < a; i++) {
-            if (map[i][currentPlayer->yPosition] == 1) {
+            if (map_[i][currentPlayer->yPosition] == 1) {
                 return true;
             }
         }
@@ -160,7 +160,7 @@ bool obstacleInSight (Character *target) {
                 if (absX == absY) {
                     int j = currentPlayer->yPosition;
                     for (int i = currentPlayer->xPosition; i < target->xPosition; i++) {
-                        if (map[i][j] == 1) {
+                        if (map_[i][j] == 1) {
                             return true;
                         }
                         j++;
@@ -179,7 +179,7 @@ bool obstacleInSight (Character *target) {
 
             else  {
                 for (int j = target->yPosition; j < currentPlayer->yPosition; j++) {
-                    if (map[currentPlayer->xPosition][j] == 1) {
+                    if (map_[currentPlayer->xPosition][j] == 1) {
                         return true;
                     }
                 }
@@ -211,13 +211,13 @@ void attack (Character *target) {
         int damage = weapon.damage - target->armor;
         target->hp = target->hp - (damage);
         printf("remaining hp %d", target->hp);
-        logAttack(actions, damage, *target);
+        logAttack(actions_, damage, *target);
     }
 }
 
 void defend () {
     currentPlayer->armor = 5;
-    logDefence(actions, currentPlayer);
+    logDefence(actions_, currentPlayer);
 }
 
 void moveToEnemy (Character target) {
@@ -306,6 +306,7 @@ void game_start()
     Warrior **warriors = load_warriors(&warriors_number);
     int **map = generate_random_map();
     locate_warriors_on_map(&map, warriors, warriors_number);
+
     print_map(map);
 
     unsigned int round = 1;
@@ -404,12 +405,13 @@ void print_warrior(Warrior *warrior)
     printf("  level: %u\n", warrior->level);
     printf("  health: %u\n", warrior->health);
     printf("  moves: %u\n", warrior->moves);
-    printf("  actions: %u\n\n", warrior->actions);
+    printf("  actions: %u\n", warrior->actions);
 }
 
 void print_warriors(Warrior **warriors, size_t length)
 {
     for (int i = 0; i < length; ++i) {
         print_warrior(warriors[i]);
+        printf("\n");
     }
 }

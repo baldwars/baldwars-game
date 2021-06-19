@@ -3,9 +3,9 @@
 #include "../game/game_struct.h"
 #include "cJSON.h"
 
-cJSON *actions;
-void logMovement (cJSON *actions, Character player);
-void logAttack (cJSON *actions, int damage, Character target);
-void logDefence (cJSON *actions, Character *player);
+cJSON *actions_;
+void logMovement (cJSON *, Character);
+void logAttack (cJSON *, int, Character);
+void logDefence (cJSON *, Character *);
 
 #endif //BALDWARS_JSONACTIONLOG_H

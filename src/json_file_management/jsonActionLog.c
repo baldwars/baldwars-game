@@ -1,9 +1,9 @@
 #include "cJSON.h"
 #include "jsonActionLog.h"
 
-void logMovement (cJSON *actions, Character player) {
+void logMovement (cJSON *actions_, Character player) {
     cJSON *movementAction = cJSON_CreateObject();
-    cJSON_AddItemToObject(actions, "movement log", movementAction);
+    cJSON_AddItemToObject(actions_, "movement log", movementAction);
     cJSON *remainingMP = cJSON_CreateNumber(player.movementPoint);
     cJSON_AddItemToObject(movementAction, "Remaining movement points", remainingMP);
     cJSON *newXPosition = cJSON_CreateNumber(player.xPosition);
