@@ -433,23 +433,13 @@ void priority_queue_check_alloc(PriorityQueue *queue)
 size_t priority_queue_peek(PriorityQueue *queue)
 {
     int lowest_priority = INT_MAX;
-//    int highest_priority = INT_MIN;
     int index = -1;
 
     for (int i = 0; i < queue->length; ++i) {
         PQItem *item_i = queue->items[i];
-        PQItem *item_index = queue->items[index];
-        if ((lowest_priority == item_i->priority
-//        if ((highest_priority == item_i->priority
-            && index >= 0
-//            && item_i
-//            && hash_node(queue->items[index]->value) < hash_node(queue->items[i]->value)
-            )
-            || (lowest_priority > item_i->priority))
-//            || (highest_priority < item_i->priority))
+        if ((lowest_priority == item_i->priority && index >= 0) || (lowest_priority > item_i->priority))
         {
             lowest_priority = queue->items[i]->priority;
-//            highest_priority = queue->items[i]->priority;
             index = i;
         }
     }
@@ -481,4 +471,17 @@ Node *priority_queue_dequeue(PriorityQueue *queue)
 unsigned short priority_queue_is_empty(PriorityQueue *queue)
 {
     return queue->length == 0;
+}
+
+char *get_file_content(char * path)
+{
+    FILE *fp;
+
+    char *buffer = calloc(CAPACITY_LIMIT, sizeof(char));
+
+    fp = fopen(path,"r");
+    fread(buffer, CAPACITY_LIMIT, 1, fp);
+    fclose(fp);
+
+    return buffer;
 }

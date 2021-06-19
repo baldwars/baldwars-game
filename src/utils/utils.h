@@ -117,4 +117,7 @@ void priority_queue_enqueue(PriorityQueue *, PQItem *);
 Node *priority_queue_dequeue(PriorityQueue *);
 unsigned short priority_queue_is_empty(PriorityQueue *);
 
+// FILE
+char *get_file_content(char * path);
+
 #endif //UNTITLED_UTILS_H
