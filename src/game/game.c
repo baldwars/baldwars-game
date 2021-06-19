@@ -1,15 +1,9 @@
-//
-// Created by Latif on 07/06/2021.
-//
-
-#include "game_function.h"
+#include "game.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "game_struct.h"
-//#include "../json_file_management/cJSON.h"
-//#include "../json_file_management/cJSON.c"
 #include "../json_file_management/jsonActionLog.h"
+#include "../utils/utils.h"
 
 const int smallTABSIZE = 25;
 const int mediumTABSIZE = 50;
@@ -56,7 +50,7 @@ void setupMap (int index) {
     }
 
     int i, j;
-    float nbObsCalc = 1/5 * (TABSIZES[index] * TABSIZES[index]);
+    float nbObsCalc = 1 / 5 * (TABSIZES[index] * TABSIZES[index]);
     int nbObs = (int) nbObsCalc;
 
     int pose2 = TABSIZES[index] - nbObs;
