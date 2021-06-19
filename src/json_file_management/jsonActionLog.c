@@ -1,10 +1,5 @@
-//
-// Created by Latif on 31/05/2021.
-//
 #include "cJSON.h"
 #include "jsonActionLog.h"
-
-
 
 void logMovement (cJSON *actions, Character player) {
     cJSON *movementAction = cJSON_CreateObject();
