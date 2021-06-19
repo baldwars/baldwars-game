@@ -21,7 +21,7 @@ Character **players;
 Character *currentPlayer;
 
 int **map_;
-
+Warrior *current_warrior_;
 
 const int TABSIZES[3] = {smallTABSIZE, mediumTABSIZE, largeTABSIZE};
 const int OBSTACLES[3] = {smallOBSTACLE, mediumOBSTACLE, largeOBSTACLE};
@@ -58,7 +58,6 @@ void setupMap (int index) {
     map_[nbObs][nbObs] = 1;
     map_[pose2][pose2] = 1;
 
-    srand(NULL);
     for (int k = 0; k < OBSTACLES[index]; k++) {
         do {
             i = rand() % 25;
@@ -427,4 +426,9 @@ void print_warriors(Warrior **warriors, size_t length)
 int **get_map()
 {
     return map_;
+}
+
+Warrior *get_current_warrior()
+{
+    return current_warrior_;
 }
