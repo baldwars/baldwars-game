@@ -55,8 +55,8 @@ bool inRange (Character *target);
 
 // DISPLAY
 void print_map(int **);
-void print_player(Warrior *);
-void print_players(Warrior **, size_t);
+void print_warrior(Warrior *);
+void print_warriors(Warrior **, size_t);
 
 
 #endif //BALDWARS_GAME_GAME_FUNCTION_H
