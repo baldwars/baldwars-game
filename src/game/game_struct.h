@@ -1,7 +1,3 @@
-//
-// Created by Latif on 07/06/2021.
-//
-
 #ifndef BALDWARS_GAME_GAME_STRUCT_H
 #define BALDWARS_GAME_GAME_STRUCT_H
 
