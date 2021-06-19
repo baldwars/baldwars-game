@@ -22,6 +22,7 @@ Character *currentPlayer;
 
 int **map_;
 Warrior *current_warrior_;
+Warrior **warriors_;
 
 const int TABSIZES[3] = {smallTABSIZE, mediumTABSIZE, largeTABSIZE};
 const int OBSTACLES[3] = {smallOBSTACLE, mediumOBSTACLE, largeOBSTACLE};
@@ -431,4 +432,9 @@ int **get_map()
 Warrior *get_current_warrior()
 {
     return current_warrior_;
+}
+
+Warrior **get_warriors()
+{
+    return warriors_;
 }
