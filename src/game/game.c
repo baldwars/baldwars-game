@@ -262,7 +262,8 @@ Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t 
         .health = health,
         .actions = action,
         .moves = moves,
-        .weapon = NULL
+        .weapon = NULL,
+        .cell = NULL
     };
 
     return warrior;
