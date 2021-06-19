@@ -39,7 +39,7 @@ struct warrior_t {
 };
 
 // INIT
-Cell *cell_init(int, int);
+Cell *cell_init(size_t, size_t);
 Weapon_ *weapon_init();
 Warrior *warrior_init(unsigned short, const char *, size_t, size_t, size_t, size_t);
 int **map_init();
