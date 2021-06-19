@@ -18,8 +18,8 @@ add_executable(BaldWars_Game
         json_file_management/jsonActionLog.h
         path_finding/path_finding.c
         path_finding/path_finding.h
-        player_functions/functions.c
-        player_functions/functions.h
+        ai_tools/tools.c
+        ai_tools/tools.h
         utils/utils.c
         utils/utils.h
         main.c)
