@@ -1,10 +1,6 @@
-//
-// Created by Latif on 31/05/2021.
-//
-
 #ifndef BALDWARS_JSONACTIONLOG_H
 #define BALDWARS_JSONACTIONLOG_H
-#include "../game_function/game_struct.h"
+#include "../game/game_struct.h"
 #include "cJSON.h"
 
 cJSON *actions;
