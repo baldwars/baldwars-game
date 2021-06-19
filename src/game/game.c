@@ -19,6 +19,7 @@ int turn = 0;
 int nbPlayers = 2;
 Character **players;
 Character *currentPlayer;
+
 int **map_;
 
 
@@ -251,8 +252,7 @@ Cell *cell_init(int x, int y)
     return cell;
 }
 
-Warrior *warrior_init(unsigned short id,const char *name, unsigned int level,
-                          unsigned int health, unsigned int moves, unsigned int action)
+Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t health, size_t moves, size_t action)
 {
     Warrior *warrior = malloc(sizeof(Warrior));
     *warrior = (Warrior){
@@ -268,35 +268,42 @@ Warrior *warrior_init(unsigned short id,const char *name, unsigned int level,
     return warrior;
 }
 
+Warrior *load_warrior(cJSON *warrior)
+{
+    cJSON *id, *name, *level, *health, *moves, *actions;
+
+    id = cJSON_GetObjectItemCaseSensitive(warrior, "id");
+    name = cJSON_GetObjectItemCaseSensitive(warrior, "name");
+    level = cJSON_GetObjectItemCaseSensitive(warrior, "level");
+    health = cJSON_GetObjectItemCaseSensitive(warrior, "health");
+    moves = cJSON_GetObjectItemCaseSensitive(warrior, "moves");
+    actions = cJSON_GetObjectItemCaseSensitive(warrior, "actions");
+
+    size_t id_val = (size_t)cJSON_GetNumberValue(id);
+    char *name_val = cJSON_GetStringValue(name);
+    size_t level_val = (size_t)cJSON_GetNumberValue(level);
+    size_t health_val = (size_t)cJSON_GetNumberValue(health);
+    size_t actions_val = (size_t)cJSON_GetNumberValue(actions);
+    size_t moves_val = (size_t)cJSON_GetNumberValue(moves);
+
+    return warrior_init(id_val, name_val, level_val, health_val, moves_val, actions_val);
+}
+
 Warrior **load_warriors(size_t *warriors_length)
 {
     char *buffer = get_file_content("./warriors.json");
 
+    cJSON *item;
     cJSON *parsed = cJSON_Parse(buffer);
-    cJSON *item, *id, *name, *level, *health, *moves, *actions;
-
     *warriors_length = cJSON_GetArraySize(parsed);
     Warrior **warriors = malloc(sizeof(Warrior *) * (*warriors_length));
 
     for (int i = 0; i < *warriors_length; ++i)
     {
         item = cJSON_GetArrayItem(parsed, i);
-        id = cJSON_GetObjectItemCaseSensitive(item, "id");
-        name = cJSON_GetObjectItemCaseSensitive(item, "name");
-        level = cJSON_GetObjectItemCaseSensitive(item, "level");
-        health = cJSON_GetObjectItemCaseSensitive(item, "health");
-        moves = cJSON_GetObjectItemCaseSensitive(item, "moves");
-        actions = cJSON_GetObjectItemCaseSensitive(item, "actions");
-
-        char *name_val = cJSON_GetStringValue(name);
-        unsigned int id_val = (unsigned int)cJSON_GetNumberValue(id);
-        unsigned int level_val = (unsigned int)cJSON_GetNumberValue(level);
-        unsigned int health_val = (unsigned int)cJSON_GetNumberValue(health);
-        unsigned int actions_val = (unsigned int)cJSON_GetNumberValue(actions);
-        unsigned int moves_val = (unsigned int)cJSON_GetNumberValue(moves);
-
-        warriors[i] = warrior_init(id_val, name_val, level_val, health_val, moves_val, actions_val);
+        warriors[i] = load_warrior(item);
     }
+
     return warriors;
 }
 
@@ -309,7 +316,7 @@ void game_start()
 
     print_map(map);
 
-    unsigned int round = 1;
+    size_t round = 1;
     unsigned short fight_is_over = 0;
 
     while (!fight_is_over) {
@@ -349,8 +356,8 @@ int **generate_random_map()
 
 void generate_walls_on_map(int ***map)
 {
-    size_t min = MAP_SIZE * MAP_SIZE * 0.2;
-    size_t max = MAP_SIZE * MAP_SIZE * 0.4;
+    size_t min = MAP_SIZE * MAP_SIZE * WALLS_MIN_RATIO;
+    size_t max = MAP_SIZE * MAP_SIZE * WALLS_MAX_RATIO;
     size_t walls_number = rand() % (max - min + 1) + min;
 
     for (int i = 0; i < walls_number; ++i) {
@@ -414,4 +421,10 @@ void print_warriors(Warrior **warriors, size_t length)
         print_warrior(warriors[i]);
         printf("\n");
     }
+}
+
+// ACCESSORS
+int **get_map()
+{
+    return map_;
 }
