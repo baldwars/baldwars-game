@@ -35,6 +35,7 @@ struct warrior_t {
     size_t moves;
     size_t actions;
     Weapon_ *weapon;
+    Cell *cell;
 };
 
 // INIT
