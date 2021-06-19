@@ -241,7 +241,7 @@ void writeJSON (char *string) {
     fclose(jsonFile);
 }
 
-Cell *cell_init(int x, int y)
+Cell *cell_init(size_t x, size_t y)
 {
     Cell *cell = malloc(sizeof(Cell));
     *cell = (Cell){
@@ -391,6 +391,7 @@ void locate_warriors_on_map(int *** map, Warrior **warriors, size_t warriors_num
         } while ((*map)[random_x][random_y] == -1);
 
         (*map)[random_x][random_y] = warriors[i]->id;
+        warriors[i]->cell = cell_init(random_x, random_y);
     }
 }
 
