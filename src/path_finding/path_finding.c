@@ -119,8 +119,6 @@ Nodes *reconstruct_path(HashTable *came_from, Node *start, Node *goal)
         current = (Node *)hash_table_get_entry_value_by_key(came_from, current);
     }
 
-//    nodes_push_back(path, start);
-
     return nodes_reverse(path);
 }
 
