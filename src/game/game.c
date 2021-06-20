@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "../json_file_management/jsonActionLog.h"
 #include "../utils/utils.h"
+#include "../path_finding/path_finding.h"
+#include "../ai_tools/tools.h"
 
 const int smallTABSIZE = 25;
 const int mediumTABSIZE = 50;
@@ -308,26 +310,52 @@ Warrior **load_warriors(size_t *warriors_length)
     return warriors;
 }
 
+unsigned short map_is_valid(int **map)
+{
+    Nodes *nodes = nodes_init();
+
+    for (int i = 0; i < MAP_SIZE; ++i) {
+        for (int j = 0; j < MAP_SIZE; ++j) {
+            if (map[i][j] > 0) {
+                nodes_push_back(nodes, node_init(i, j, 0, 1));
+            }
+        }
+    }
+
+    HashTable *came_from = hash_table_init();
+    HashTable *cost_so_far = hash_table_init();
+    Nodes *graph = convert_grid_to_nodes(map, MAP_SIZE, MAP_SIZE);
+
+    a_star_search(graph, nodes->items[0], nodes->items[1], came_from, cost_so_far);
+
+    return reconstruct_path(came_from, nodes->items[0], nodes->items[1]) ? 1 : 0;
+}
+
 void game_start()
 {
     size_t warriors_number = 0;
     Warrior **warriors = load_warriors(&warriors_number);
-    int **map = generate_random_map();
-    locate_warriors_on_map(&map, warriors, warriors_number);
 
-    print_map(map);
+    map_ = generate_map(warriors, warriors_number);
+    print_map(map_);
 
     size_t round = 1;
     unsigned short fight_is_over = 0;
 
-    while (!fight_is_over) {
-        printf("Round %u:\n", round);
-        print_warriors(warriors, warriors_number);
+    current_warrior_ = warriors[0];
 
-        if (++round > 5) {
-            fight_is_over = 1;
-        }
-    }
+    printf("\n");
+    move_toward(warriors[1]->cell);
+    printf("\n");
+
+//    while (!fight_is_over) {
+//        printf("Round %u:\n", round);
+//        print_warriors(warriors, warriors_number);
+//
+//        if (++round > 5) {
+//            fight_is_over = 1;
+//        }
+//    }
 }
 
 int **map_init()
@@ -336,6 +364,36 @@ int **map_init()
     for (int i = 0; i < MAP_SIZE; ++i) {
         map[i] = malloc(sizeof(int) * MAP_SIZE);
     }
+
+    return map;
+}
+
+void free_map(int **map)
+{
+    for (int i = 0; i < MAP_SIZE; ++i) {
+        free(map[i]);
+    }
+
+    free(map);
+}
+
+int **generate_map(Warrior **warriors, size_t warriors_number)
+{
+    int **map = NULL;
+    unsigned short is_valid_map;
+
+    do {
+        map = generate_random_map();
+        locate_warriors_on_map(&map, warriors, warriors_number);
+
+        is_valid_map = map_is_valid(map);
+
+        if (!is_valid_map) {
+            free_map(map);
+            map = NULL;
+        }
+
+    } while (!is_valid_map);
 
     return map;
 }
@@ -423,6 +481,34 @@ void print_warriors(Warrior **warriors, size_t length)
         print_warrior(warriors[i]);
         printf("\n");
     }
+}
+
+// JSON
+cJSON *log_movement(Cell *cell)
+{
+    cJSON *json_cell = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json_cell, "x", cell->x);
+    cJSON_AddNumberToObject(json_cell, "y", cell->y);
+
+    return json_cell;
+}
+
+cJSON *log_movement_action(cJSON *json_path)
+{
+    cJSON *json_action = cJSON_CreateObject();
+    cJSON_AddStringToObject(json_action, "type", "move");
+    cJSON_AddItemToObject(json_action, "path", json_path);
+
+    return json_action;
+}
+
+cJSON *log_attack_action(size_t weapon_id)
+{
+    cJSON *json_action = cJSON_CreateObject();
+    cJSON_AddStringToObject(json_action, "type", "attack");
+    cJSON_AddNumberToObject(json_action, "path", weapon_id);
+
+    return json_action;
 }
 
 // ACCESSORS
