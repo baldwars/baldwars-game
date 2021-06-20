@@ -1,51 +1,7 @@
 #include <stdio.h>
 #include "utils.h"
 
-Edge edge_init(Node from, Node to, size_t weight)
-{
-    Edge *edge = malloc(sizeof(Edge));
-    *edge = (Edge){
-            .from = from,
-            .to = to,
-            .weight = weight
-    };
-
-    return *edge;
-}
-
-Edges edges_init_alloc(size_t capacity)
-{
-    Edges *edges = malloc(sizeof(Edges));
-    *edges = (Edges){
-            .length = 0,
-            .capacity = capacity,
-            .items = malloc(sizeof(Edge) * capacity)
-    };
-
-    return *edges;
-}
-
-Edges edges_init()
-{
-    return edges_init_alloc(1);
-}
-
-void edges_check_alloc(Edges *edges)
-{
-    if (edges->length >= edges->capacity)
-    {
-        edges->capacity += (edges->capacity < CAPACITY_LIMIT) ? edges->capacity : CAPACITY_LIMIT;
-        edges->items = realloc(edges->items, (sizeof(Edge *) * edges->capacity));
-    }
-}
-
-void edges_push_back(Edges *edges, Edge value)
-{
-    edges_check_alloc(edges);
-    edges->items[edges->length++] = value;
-}
-
-Node *node_init(int x, int y, unsigned short is_obstacle, unsigned short is_entity)
+Node *node_init(size_t x, size_t y, unsigned short is_obstacle, unsigned short is_entity)
 {
     Node *node = malloc(sizeof(Node));
     *node = (Node){
@@ -120,23 +76,7 @@ Nodes *nodes_reverse(Nodes *nodes)
     return reversed;
 }
 
-Graph graph_init_alloc(size_t nodes_capacity, size_t edges_capacity)
-{
-    Graph *graph = malloc(sizeof(Graph));
-    *graph = (Graph){
-            .nodes = nodes_init_alloc(nodes_capacity),
-            .edges = edges_init_alloc(edges_capacity)
-    };
-
-    return *graph;
-}
-
-Graph graph_init()
-{
-    return graph_init_alloc(1, 1);
-}
-
-int nodes_index_of(Nodes *nodes, int x, int y)
+int nodes_index_of(Nodes *nodes, size_t x, size_t y)
 {
     for (int i = 0; i < nodes->length; ++i) {
         if (nodes->items[i]->x == x && nodes->items[i]->y == y)
@@ -391,7 +331,7 @@ void print_int_hash_table(HashTable *hash_table)
     }
 }
 
-PQItem *pq_item_init(Node *value, int priority)
+PQItem *pq_item_init(Node *value, size_t priority)
 {
     PQItem *item = malloc(sizeof(PQItem));
 
@@ -430,9 +370,9 @@ void priority_queue_check_alloc(PriorityQueue *queue)
     }
 }
 
-size_t priority_queue_peek(PriorityQueue *queue)
+int priority_queue_peek(PriorityQueue *queue)
 {
-    int lowest_priority = INT_MAX;
+    size_t lowest_priority = INT_MAX;
     int index = -1;
 
     for (int i = 0; i < queue->length; ++i) {

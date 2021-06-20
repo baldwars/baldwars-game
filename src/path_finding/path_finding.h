@@ -24,9 +24,9 @@ struct directions_t {
 int heuristic(Node *, Node *);
 Nodes *reconstruct_path(HashTable *, Node *, Node *);
 
-HashTable *breadth_first_search(Graph, Node *, Node *);
-void dijkstra_search(Graph, Node *, Node *, HashTable *, HashTable *);
-void a_star_search(Graph, Node *, Node *, HashTable *, HashTable *);
+HashTable *breadth_first_search(Nodes *, Node *, Node *);
+void dijkstra_search(Nodes *, Node *, Node *, HashTable *, HashTable *);
+void a_star_search(Nodes *, Node *, Node *, HashTable *, HashTable *);
 
 Nodes *neighbors_of(Node *, Nodes *, unsigned short);
 Directions *get_directions(unsigned short);
