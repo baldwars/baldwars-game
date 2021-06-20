@@ -164,6 +164,7 @@ Entry *entry_init(Node *key, void *value)
 HashTable *hash_table_init()
 {
     HashTable *hash_table = malloc(sizeof(HashTable));
+    hash_table->count = 0;
     hash_table->entries = malloc(sizeof(Entry *) * HASH_TABLE_CAPACITY);
 
     for (int i = 0; i < HASH_TABLE_CAPACITY; ++i) {
@@ -180,6 +181,7 @@ void hash_table_set_entry(HashTable *hashtable, Node *key, void *value)
 
     if (entry == NULL) {
         hashtable->entries[slot] = entry_init(key, value);
+        hashtable->count++;
         return;
     }
 
@@ -195,6 +197,7 @@ void hash_table_set_entry(HashTable *hashtable, Node *key, void *value)
         entry = prev->next;
     }
     prev->next = entry_init(key, value);
+    hashtable->count++;
 }
 
 void *hash_table_get_entry_value_by_key(HashTable *hashtable, Node *key)

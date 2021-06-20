@@ -37,7 +37,8 @@ struct entry_t {
 
 struct hash_table_t {
     Entry **entries;
-} ;
+    size_t count;
+};
 
 struct priority_queue_item_t {
     Node *value;
