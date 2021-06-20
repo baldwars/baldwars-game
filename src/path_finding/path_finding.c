@@ -106,8 +106,13 @@ void a_star_search(Nodes *graph, Node *start, Node *goal, HashTable *came_from, 
 
 Nodes *reconstruct_path(HashTable *came_from, Node *start, Node *goal)
 {
+    if (!hash_table_get_entry_value_by_key(came_from, goal)) {
+        return NULL;
+    }
+
     Nodes *path = nodes_init();
     Node *current = goal;
+
     while (!nodes_are_equals(current, start))
     {
         nodes_push_back(path, current);
