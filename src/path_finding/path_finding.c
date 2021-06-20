@@ -87,7 +87,7 @@ void a_star_search(Nodes *graph, Node *start, Node *goal, HashTable *came_from, 
 
         int *current_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, current);
         Nodes *neighbors = neighbors_of(current, graph, DIRECTION_NO_DIAGONALS);
-//        Nodes *neighbors = neighbors_of(current, graph.nodes, DIRECTION_NO_DIAGONALS);
+
         for (int i = 0; i < neighbors->length; ++i) {
             Node *neighbor = neighbors->items[i];
             int *neighbor_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, neighbor);
