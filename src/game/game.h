@@ -68,8 +68,14 @@ void print_warriors(Warrior **, size_t);
 
 // JSON
 cJSON *log_movement(Cell *);
-cJSON *log_movement_action(cJSON *);
-cJSON *log_attack_action(size_t);
+cJSON *log_movements_action(cJSON *);
+cJSON *log_attack(size_t);
+cJSON *log_attacks_action(cJSON *);
+cJSON *log_fight(cJSON *);
+cJSON *log_round(cJSON *);
+void log_warriors(cJSON *);
+cJSON *log_warrior(const char *);
+void log_warrior_action(cJSON *);
 
 // ACCESSORS
 int **get_map();

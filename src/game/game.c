@@ -343,10 +343,19 @@ void game_start()
     unsigned short fight_is_over = 0;
 
     current_warrior_ = warriors[0];
-
-    printf("\n");
     move_toward(warriors[1]->cell);
-    printf("\n");
+    current_warrior_->moves = 3;
+    move_toward(warriors[1]->cell);
+    cJSON *json_warrior = log_warrior(current_warrior_->name);
+    log_warriors(json_warrior);
+
+//    current_warrior_ = warriors[1];
+//    move_toward(warriors[0]->cell);
+//    json_warrior = log_warrior(current_warrior_->name);
+//    log_warriors(json_warrior);
+
+    char *json = cJSON_Print(json_warriors_);
+    printf("json: %s\n", json);
 
 //    while (!fight_is_over) {
 //        printf("Round %u:\n", round);

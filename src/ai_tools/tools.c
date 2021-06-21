@@ -31,8 +31,6 @@ size_t move_toward(Cell *target)
     a_star_search(graph, start, end, came_from, cost_so_far);
     Nodes *path = reconstruct_path(came_from, start, end);
 
-    print_nodes(path);
-
     cJSON *json_path = cJSON_CreateArray();
 
     size_t moves = current_warrior->moves;
@@ -53,8 +51,8 @@ size_t move_toward(Cell *target)
     size_t json_path_length = cJSON_GetArraySize(json_path);
 
     if (json_path_length > 0) {
-        cJSON *json_action = log_movement_action(json_path);
-
+        cJSON *json_action = log_movements_action(json_path);
+        log_warrior_action(json_action);
     }
 
     return current_warrior->moves;
