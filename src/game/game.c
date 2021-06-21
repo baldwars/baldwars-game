@@ -26,49 +26,8 @@ int **map_;
 Warrior *current_warrior_;
 Warrior **warriors_;
 
-const int TABSIZES[3] = {smallTABSIZE, mediumTABSIZE, largeTABSIZE};
-const int OBSTACLES[3] = {smallOBSTACLE, mediumOBSTACLE, largeOBSTACLE};
-
-void initMap (int index) {
-    map_ = (int**)malloc(TABSIZES[index] * sizeof(int));
-    printf("non \n");
-    for (int i = 0; i < TABSIZES[index]; i++) {
-        printf("oui");
-        map_ [i] = (int*) malloc(TABSIZES[index] * sizeof(int));
-    }
-}
-
-void deleteMap (int index) {
-    for (int i = 0; i < TABSIZES[index]; i++) {
-        free (map_[i]);
-    }
-    free(map_);
-}
-
-void setupMap (int index) {
-
-    for (int i = 0; i < TABSIZES[index]; i++) {
-        for (int j = 0; j < TABSIZES[index]; j++) {
-            map_[i][j] = 0;
-        }
-    }
-
-    int i, j;
-    float nbObsCalc = 1 / 5 * (TABSIZES[index] * TABSIZES[index]);
-    int nbObs = (int) nbObsCalc;
-
-    int pose2 = TABSIZES[index] - nbObs;
-    map_[nbObs][nbObs] = 1;
-    map_[pose2][pose2] = 1;
-
-    for (int k = 0; k < OBSTACLES[index]; k++) {
-        do {
-            i = rand() % 25;
-            j = rand() % 25;
-        } while (map_[i][j] != 0);
-        map_[i][j] = -1;
-    }
-}
+cJSON *json_warriors_;
+cJSON *json_current_warrior_actions_;
 
 void loadScript() {
     FILE *scriptFile;
@@ -502,7 +461,7 @@ cJSON *log_movement(Cell *cell)
     return json_cell;
 }
 
-cJSON *log_movement_action(cJSON *json_path)
+cJSON *log_movements_action(cJSON *json_path)
 {
     cJSON *json_action = cJSON_CreateObject();
     cJSON_AddStringToObject(json_action, "type", "move");
@@ -518,6 +477,33 @@ cJSON *log_attack_action(size_t weapon_id)
     cJSON_AddNumberToObject(json_action, "path", weapon_id);
 
     return json_action;
+}
+
+void log_warrior_action(cJSON *warrior_action)
+{
+    if (!json_current_warrior_actions_) {
+        json_current_warrior_actions_ = cJSON_CreateArray();
+    }
+
+    cJSON_AddItemToArray(json_current_warrior_actions_, warrior_action);
+}
+
+void log_warriors(cJSON *json_warrior)
+{
+    if (!json_warriors_) {
+        json_warriors_ = cJSON_CreateArray();
+    }
+
+    cJSON_AddItemToArray(json_warriors_, json_warrior);
+}
+
+cJSON *log_warrior(const char *warrior_name)
+{
+    cJSON *json_warrior = cJSON_CreateObject();
+    cJSON_AddStringToObject(json_warrior, "name", warrior_name);
+    cJSON_AddItemToObject(json_warrior, "actions", json_current_warrior_actions_);
+
+    return json_warrior;
 }
 
 // ACCESSORS
