@@ -47,7 +47,8 @@ void nodes_push_back(Nodes *nodes, Node *value)
 
 unsigned short nodes_are_equals(Node *a, Node *b)
 {
-    return (a->x == b->x)
+    return a && b
+        && (a->x == b->x)
         && (a->y == b->y)
         && (a->is_obstacle == b->is_obstacle)
         && (a->is_entity == b->is_entity);
@@ -124,7 +125,7 @@ void print_nodes(Nodes *nodes)
 
 unsigned short nodes_is_empty(Nodes *nodes)
 {
-    return nodes->length == 0;
+    return !nodes || nodes->length == 0;
 }
 
 Node *nodes_dequeue(Nodes *nodes)

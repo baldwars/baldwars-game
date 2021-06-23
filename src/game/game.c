@@ -26,6 +26,7 @@ int **map_;
 Warrior *current_warrior_;
 Warrior **warriors_;
 
+cJSON *json_rounds_;
 cJSON *json_warriors_;
 cJSON *json_current_warrior_actions_;
 
@@ -269,6 +270,12 @@ Warrior **load_warriors(size_t *warriors_length)
     return warriors;
 }
 
+void reset_warrior__action_stats(Warrior *warrior, size_t moves, size_t actions)
+{
+    warrior->moves = moves;
+    warrior->actions = actions;
+}
+
 unsigned short map_is_valid(int **map)
 {
     Nodes *nodes = nodes_init();
@@ -298,32 +305,38 @@ void game_start()
     map_ = generate_map(warriors, warriors_number);
     print_map(map_);
 
-    size_t round = 1;
+    size_t current_round = 1;
+    size_t round_limit = 2;
     unsigned short fight_is_over = 0;
 
-    current_warrior_ = warriors[0];
-    move_toward(warriors[1]->cell);
-    current_warrior_->moves = 3;
-    move_toward(warriors[1]->cell);
-    cJSON *json_warrior = log_warrior(current_warrior_->name);
-    log_warriors(json_warrior);
+    while (!fight_is_over) {
+        json_warriors_ = NULL;
+        for (int i = 0; i < warriors_number; ++i) {
+            json_current_warrior_actions_ = NULL;
+            current_warrior_ = warriors[i];
 
-//    current_warrior_ = warriors[1];
-//    move_toward(warriors[0]->cell);
-//    json_warrior = log_warrior(current_warrior_->name);
-//    log_warriors(json_warrior);
+            size_t moves = current_warrior_->moves;
+            size_t actions = current_warrior_->actions;
 
-    char *json = cJSON_Print(json_warriors_);
+            Warrior *enemy = (i == 0) ? warriors[1] : warriors[0];
+
+            move_toward(enemy->cell); // to replace by running user script
+
+            log_warrior(current_warrior_->name);
+
+            reset_warrior__action_stats(current_warrior_, moves, actions);
+        }
+
+        log_round(current_round);
+
+        if (++current_round > round_limit) {
+            fight_is_over = 1;
+        }
+    }
+
+    cJSON *json_fight = log_fight();
+    char *json = cJSON_Print(json_fight);
     printf("json: %s\n", json);
-
-//    while (!fight_is_over) {
-//        printf("Round %u:\n", round);
-//        print_warriors(warriors, warriors_number);
-//
-//        if (++round > 5) {
-//            fight_is_over = 1;
-//        }
-//    }
 }
 
 int **map_init()
@@ -334,6 +347,15 @@ int **map_init()
     }
 
     return map;
+}
+
+void update_map(int **map, Warrior *warrior, Node *node)
+{
+    map[warrior->cell->x][warrior->cell->y] = 0;
+    map[node->x][node->y] = warrior->id;
+    warrior->cell = cell_init(node->x, node->y);
+    warrior->moves--;
+
 }
 
 void free_map(int **map)
@@ -452,29 +474,36 @@ void print_warriors(Warrior **warriors, size_t length)
 }
 
 // JSON
-cJSON *log_movement(Cell *cell)
+void log_movement(Cell *cell, cJSON **json_path)
 {
     cJSON *json_cell = cJSON_CreateObject();
     cJSON_AddNumberToObject(json_cell, "x", cell->x);
     cJSON_AddNumberToObject(json_cell, "y", cell->y);
 
-    return json_cell;
+    if (!(*json_path))
+    {
+        *json_path = cJSON_CreateArray();
+    }
+
+    cJSON_AddItemToArray(*json_path, json_cell);
 }
 
-cJSON *log_movements_action(cJSON *json_path)
+void log_movements_action(cJSON *json_path)
 {
     cJSON *json_action = cJSON_CreateObject();
     cJSON_AddStringToObject(json_action, "type", "move");
-    cJSON_AddItemToObject(json_action, "path", json_path);
+    cJSON *path = (!json_path) ? cJSON_CreateArray() : json_path;
 
-    return json_action;
+    cJSON_AddItemToObject(json_action, "path", path);
+
+    log_warrior_action(json_action);
 }
 
 cJSON *log_attack_action(size_t weapon_id)
 {
     cJSON *json_action = cJSON_CreateObject();
     cJSON_AddStringToObject(json_action, "type", "attack");
-    cJSON_AddNumberToObject(json_action, "path", weapon_id);
+    cJSON_AddNumberToObject(json_action, "weapon", weapon_id);
 
     return json_action;
 }
@@ -497,13 +526,45 @@ void log_warriors(cJSON *json_warrior)
     cJSON_AddItemToArray(json_warriors_, json_warrior);
 }
 
-cJSON *log_warrior(const char *warrior_name)
+void log_warrior(const char *warrior_name)
 {
     cJSON *json_warrior = cJSON_CreateObject();
     cJSON_AddStringToObject(json_warrior, "name", warrior_name);
-    cJSON_AddItemToObject(json_warrior, "actions", json_current_warrior_actions_);
 
-    return json_warrior;
+    cJSON *actions = (!json_current_warrior_actions_) ? cJSON_CreateArray() : json_current_warrior_actions_;
+    cJSON_AddItemToObject(json_warrior, "actions", actions);
+
+    log_warriors(json_warrior);
+}
+
+void log_round(size_t round)
+{
+    cJSON *json_round = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json_round, "round", round);
+    cJSON *warriors = (!json_warriors_) ? cJSON_CreateArray() : json_warriors_;
+
+    cJSON_AddItemToObject(json_round, "warriors", warriors);
+
+    log_rounds(json_round);
+}
+
+void log_rounds(cJSON *json_round)
+{
+    if (!json_rounds_) {
+        json_rounds_ = cJSON_CreateArray();
+    }
+
+    cJSON_AddItemToArray(json_rounds_, json_round);
+}
+
+cJSON *log_fight()
+{
+    cJSON *json_fight = cJSON_CreateObject();
+    cJSON *rounds = (!json_rounds_) ? cJSON_CreateArray() : json_rounds_;
+
+    cJSON_AddItemToObject(json_fight, "fight", rounds);
+
+    return json_fight;
 }
 
 // ACCESSORS
@@ -520,4 +581,20 @@ Warrior *get_current_warrior()
 Warrior **get_warriors()
 {
     return warriors_;
+}
+
+// SEARCH
+Nodes *a_star_algorithm(int **map, Warrior *current, Cell *target)
+{
+    Nodes *graph = convert_grid_to_nodes(map, MAP_SIZE, MAP_SIZE);
+
+    HashTable *came_from = hash_table_init();
+    HashTable *cost_so_far = hash_table_init();
+
+    Node *start = node_init(current->cell->x, current->cell->y, 0, 1);
+    Node *end = node_init(target->x, target->y, 0, 1);
+
+    a_star_search(graph, start, end, came_from, cost_so_far);
+
+    return reconstruct_path(came_from, start, end);
 }

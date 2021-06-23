@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <cJSON.h>
+#include <utils.h>
 #include "game_struct.h"
 
 #define MAP_SIZE 20
@@ -48,6 +49,7 @@ Weapon_ *weapon_init();
 Warrior *warrior_init(unsigned short, const char *, size_t, size_t, size_t, size_t);
 Warrior *load_warrior(cJSON *);
 Warrior **load_warriors(size_t *);
+void reset_warrior__action_stats(Warrior *, size_t, size_t);
 
 // MAP
 int **map_init();
@@ -57,6 +59,7 @@ void generate_walls_on_map(int ***);
 void locate_warriors_on_map(int ***, Warrior **, size_t);
 unsigned short map_is_valid(int **);
 void free_map(int **);
+void update_map(int **, Warrior *, Node *);
 
 // GAME
 void game_start();
@@ -67,14 +70,15 @@ void print_warrior(Warrior *);
 void print_warriors(Warrior **, size_t);
 
 // JSON
-cJSON *log_movement(Cell *);
-cJSON *log_movements_action(cJSON *);
+void log_movement(Cell *, cJSON **);
+void log_movements_action(cJSON *);
 cJSON *log_attack(size_t);
 cJSON *log_attacks_action(cJSON *);
-cJSON *log_fight(cJSON *);
-cJSON *log_round(cJSON *);
+cJSON *log_fight();
+void log_rounds(cJSON *);
+void log_round(size_t);
 void log_warriors(cJSON *);
-cJSON *log_warrior(const char *);
+void log_warrior(const char *);
 void log_warrior_action(cJSON *);
 
 // ACCESSORS
@@ -82,6 +86,9 @@ int **get_map();
 Warrior **get_warriors();
 Warrior *get_current_warrior();
 size_t get_current_round();
+
+// SEARCH
+Nodes *a_star_algorithm(int **, Warrior *, Cell *);
 
 
 void initMap (int index);
