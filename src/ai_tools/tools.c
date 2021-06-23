@@ -9,9 +9,15 @@ Cell *get_cell()
     return warrior->cell;
 }
 
-Cell *get_cell_of(Warrior *warrior)
+Cell *get_cell_of(size_t id)
 {
+    Warrior *warrior = get_warrior_by_id(id);
     return warrior->cell;
+}
+
+size_t get_distance_between(Cell *a, Cell *b)
+{
+    return abs((int) a->x - (int) b->x) + abs((int) a->y - (int) b->y);
 }
 
 // MOVEMENTS
