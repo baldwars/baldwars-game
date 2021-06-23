@@ -41,6 +41,7 @@ struct warrior_t {
 
 // CELL
 Cell *cell_init(size_t, size_t);
+Cell *get_opposite_corner_from(Cell *);
 
 // WEAPON
 Weapon_ *weapon_init();

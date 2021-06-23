@@ -204,6 +204,7 @@ void writeJSON (char *string) {
     fclose(jsonFile);
 }
 
+// CELL
 Cell *cell_init(size_t x, size_t y)
 {
     Cell *cell = malloc(sizeof(Cell));
@@ -213,6 +214,25 @@ Cell *cell_init(size_t x, size_t y)
     };
 
     return cell;
+}
+
+Cell *get_opposite_corner_from(Cell *source)
+{
+    size_t middle = MAP_SIZE / 2;
+    size_t last_index = MAP_SIZE - 1;
+
+    if (source->x >= middle && source->y >= middle) {
+        return cell_init(0, 0);
+    }
+    else if (source->x < middle && source->y >= middle) {
+        return cell_init(last_index, 0);
+    }
+    else if (source->x >= middle && source->y < middle) {
+        return cell_init(0, last_index);
+    }
+    else {
+        return cell_init(last_index, last_index);
+    }
 }
 
 Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t health, size_t moves, size_t action)
