@@ -15,11 +15,12 @@ Cell *get_cell_of(Warrior *warrior)
 }
 
 // MOVEMENTS
-size_t move_toward(Cell *target)
+size_t move_toward(size_t id)
 {
     Warrior *current_warrior = get_current_warrior();
+    Warrior *enemy = get_warrior_by_id(id);
     int **map = get_map();
-    Node *end = node_init(target->x, target->y, 0, 1);
+    Node *target = node_init(enemy->cell->x, enemy->cell->y, 0, 1);
     Nodes *path = a_star_algorithm(map, current_warrior, target);
     cJSON *json_path = NULL;
     size_t moves = current_warrior->moves;
@@ -27,7 +28,7 @@ size_t move_toward(Cell *target)
     for (int i = 0; i < moves; ++i) {
         Node *node = nodes_dequeue(path);
 
-        if (!node || nodes_are_equals(node, end)) {
+        if (!node || nodes_are_equals(node, target)) {
             break;
         }
 

@@ -25,6 +25,7 @@ Character *currentPlayer;
 int **map_;
 Warrior *current_warrior_;
 Warrior **warriors_;
+size_t *warriors_number_;
 
 cJSON *json_rounds_;
 cJSON *json_warriors_;
@@ -270,7 +271,7 @@ Warrior **load_warriors(size_t *warriors_length)
     return warriors;
 }
 
-void reset_warrior__action_stats(Warrior *warrior, size_t moves, size_t actions)
+void reset_warrior_action_stats(Warrior *warrior, size_t moves, size_t actions)
 {
     warrior->moves = moves;
     warrior->actions = actions;
@@ -299,10 +300,10 @@ unsigned short map_is_valid(int **map)
 
 void game_start()
 {
-    size_t warriors_number = 0;
-    Warrior **warriors = load_warriors(&warriors_number);
+    warriors_number_ = malloc(sizeof(size_t));
+    warriors_ = load_warriors(warriors_number_);
 
-    map_ = generate_map(warriors, warriors_number);
+    map_ = generate_map(warriors_, *warriors_number_);
     print_map(map_);
 
     size_t current_round = 1;
@@ -311,20 +312,20 @@ void game_start()
 
     while (!fight_is_over) {
         json_warriors_ = NULL;
-        for (int i = 0; i < warriors_number; ++i) {
+        for (int i = 0; i < *warriors_number_; ++i) {
             json_current_warrior_actions_ = NULL;
-            current_warrior_ = warriors[i];
+            current_warrior_ = warriors_[i];
 
             size_t moves = current_warrior_->moves;
             size_t actions = current_warrior_->actions;
 
-            Warrior *enemy = (i == 0) ? warriors[1] : warriors[0];
+            Warrior *enemy = (i == 0) ? warriors_[1] : warriors_[0]; // to delete when user script ready
 
-            move_toward(enemy->cell); // to replace by running user script
+            move_toward(enemy->id); // to replace by running user script
 
             log_warrior(current_warrior_->name);
 
-            reset_warrior__action_stats(current_warrior_, moves, actions);
+            reset_warrior_action_stats(current_warrior_, moves, actions);
         }
 
         log_round(current_round);
@@ -578,13 +579,25 @@ Warrior *get_current_warrior()
     return current_warrior_;
 }
 
+Warrior *get_warrior_by_id(size_t id)
+{
+    for (int i = 0; i < *warriors_number_; ++i) {
+        Warrior *warrior = warriors_[i];
+        if (warrior->id == id) {
+            return warriors_[i];
+        }
+    }
+
+    return NULL;
+}
+
 Warrior **get_warriors()
 {
     return warriors_;
 }
 
 // SEARCH
-Nodes *a_star_algorithm(int **map, Warrior *current, Cell *target)
+Nodes *a_star_algorithm(int **map, Warrior *current, Node *target)
 {
     Nodes *graph = convert_grid_to_nodes(map, MAP_SIZE, MAP_SIZE);
 
@@ -592,9 +605,8 @@ Nodes *a_star_algorithm(int **map, Warrior *current, Cell *target)
     HashTable *cost_so_far = hash_table_init();
 
     Node *start = node_init(current->cell->x, current->cell->y, 0, 1);
-    Node *end = node_init(target->x, target->y, 0, 1);
 
-    a_star_search(graph, start, end, came_from, cost_so_far);
+    a_star_search(graph, start, target, came_from, cost_so_far);
 
-    return reconstruct_path(came_from, start, end);
+    return reconstruct_path(came_from, start, target);
 }

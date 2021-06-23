@@ -49,7 +49,7 @@ Weapon_ *weapon_init();
 Warrior *warrior_init(unsigned short, const char *, size_t, size_t, size_t, size_t);
 Warrior *load_warrior(cJSON *);
 Warrior **load_warriors(size_t *);
-void reset_warrior__action_stats(Warrior *, size_t, size_t);
+void reset_warrior_action_stats(Warrior *, size_t, size_t);
 
 // MAP
 int **map_init();
@@ -85,10 +85,11 @@ void log_warrior_action(cJSON *);
 int **get_map();
 Warrior **get_warriors();
 Warrior *get_current_warrior();
+Warrior *get_warrior_by_id(size_t);
 size_t get_current_round();
 
 // SEARCH
-Nodes *a_star_algorithm(int **, Warrior *, Cell *);
+Nodes *a_star_algorithm(int **, Warrior *, Node *);
 
 
 void initMap (int index);
