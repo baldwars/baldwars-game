@@ -26,6 +26,8 @@ int **map_;
 Warrior *current_warrior_;
 Warrior **warriors_;
 size_t *warriors_number_;
+Weapon **weapons_;
+size_t *weapons_number_;
 
 cJSON *json_rounds_;
 cJSON *json_warriors_;
@@ -389,6 +391,8 @@ void game_start()
 {
     warriors_number_ = malloc(sizeof(size_t));
     warriors_ = load_warriors(warriors_number_);
+    weapons_number_ = malloc(sizeof(size_t));
+    weapons_ = load_weapons(weapons_number_);
 
     map_ = generate_map(warriors_, *warriors_number_);
     print_map(map_);
