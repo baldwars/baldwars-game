@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <stdio.h>
 #include <stdlib.h>
 #include "path_finding/path_finding.h"
@@ -63,6 +64,15 @@ int main() {
 
     printf("\nPath obtained from { 0, 1 } to { 3, 3 } with A*:\n");
     print_nodes(a_path);
+=======
+#include <time.h>
+#include "game/game.h"
+
+int main() {
+    srand(time(NULL));
+
+    game_start();
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 
     return 0;
 }

@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include "path_finding.h"
 
+<<<<<<< HEAD
 HashTable *breadth_first_search(Graph graph, Node *start, Node *goal)
+=======
+HashTable *breadth_first_search(Nodes *graph, Node *start, Node *goal)
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 {
     Nodes *frontier_queue = nodes_init();
     nodes_push_back(frontier_queue, start);
@@ -16,7 +20,11 @@ HashTable *breadth_first_search(Graph graph, Node *start, Node *goal)
             break;
         }
 
+<<<<<<< HEAD
         Nodes *neighbors = neighbors_of(current, graph.nodes, DIRECTION_NO_DIAGONALS);
+=======
+        Nodes *neighbors = neighbors_of(current, graph, DIRECTION_NO_DIAGONALS);
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
         for (int i = 0; i < neighbors->length; ++i)
         {
             Node *neighbor = neighbors->items[i];
@@ -31,7 +39,11 @@ HashTable *breadth_first_search(Graph graph, Node *start, Node *goal)
     return came_from;
 }
 
+<<<<<<< HEAD
 void dijkstra_search(Graph graph, Node *start, Node *goal, HashTable *came_from, HashTable *cost_so_far)
+=======
+void dijkstra_search(Nodes *graph, Node *start, Node *goal, HashTable *came_from, HashTable *cost_so_far)
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 {
     PriorityQueue *frontier = priority_queue_init();
     priority_queue_enqueue(frontier, pq_item_init(start, 0));
@@ -49,7 +61,11 @@ void dijkstra_search(Graph graph, Node *start, Node *goal, HashTable *came_from,
             break;
         }
 
+<<<<<<< HEAD
         Nodes *neighbors = neighbors_of(current, graph.nodes, DIRECTION_NO_DIAGONALS);
+=======
+        Nodes *neighbors = neighbors_of(current, graph, DIRECTION_NO_DIAGONALS);
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
         for (int i = 0; i < neighbors->length; ++i) {
             Node *neighbor = neighbors->items[i];
             int *current_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, current);
@@ -66,7 +82,11 @@ void dijkstra_search(Graph graph, Node *start, Node *goal, HashTable *came_from,
     }
 }
 
+<<<<<<< HEAD
 void a_star_search(Graph graph, Node *start, Node *goal, HashTable *came_from, HashTable *cost_so_far)
+=======
+void a_star_search(Nodes *graph, Node *start, Node *goal, HashTable *came_from, HashTable *cost_so_far)
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 {
     PriorityQueue *frontier = priority_queue_init();
     priority_queue_enqueue(frontier, pq_item_init(start, 0));
@@ -75,7 +95,10 @@ void a_star_search(Graph graph, Node *start, Node *goal, HashTable *came_from, H
     hash_table_set_entry(came_from, start, start);
     hash_table_set_entry(cost_so_far, start, &priority_start);
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
     while (!priority_queue_is_empty(frontier))
     {
         Node *current = priority_queue_dequeue(frontier);
@@ -86,7 +109,12 @@ void a_star_search(Graph graph, Node *start, Node *goal, HashTable *came_from, H
         }
 
         int *current_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, current);
+<<<<<<< HEAD
         Nodes *neighbors = neighbors_of(current, graph.nodes, DIRECTION_NO_DIAGONALS);
+=======
+        Nodes *neighbors = neighbors_of(current, graph, DIRECTION_NO_DIAGONALS);
+
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
         for (int i = 0; i < neighbors->length; ++i) {
             Node *neighbor = neighbors->items[i];
             int *neighbor_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, neighbor);
@@ -105,22 +133,39 @@ void a_star_search(Graph graph, Node *start, Node *goal, HashTable *came_from, H
 
 Nodes *reconstruct_path(HashTable *came_from, Node *start, Node *goal)
 {
+<<<<<<< HEAD
     Nodes *path = nodes_init();
     Node *current = goal;
+=======
+    if (!hash_table_get_entry_value_by_key(came_from, goal)) {
+        return NULL;
+    }
+
+    Nodes *path = nodes_init();
+    Node *current = goal;
+
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
     while (!nodes_are_equals(current, start))
     {
         nodes_push_back(path, current);
         current = (Node *)hash_table_get_entry_value_by_key(came_from, current);
     }
 
+<<<<<<< HEAD
     nodes_push_back(path, start);
 
+=======
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
     return nodes_reverse(path);
 }
 
 int heuristic(Node *a, Node *b)
 {
+<<<<<<< HEAD
     return abs(a->x - b->x) + abs(a->y - b->y);
+=======
+    return abs((int)a->x - (int)b->x) + abs((int)a->y - (int)b->y);
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 }
 
 Nodes *neighbors_of(Node *origin, Nodes *nodes, unsigned short include_diagonals)
@@ -130,8 +175,13 @@ Nodes *neighbors_of(Node *origin, Nodes *nodes, unsigned short include_diagonals
 
     for (int i = 0; i < directions->length; ++i)
     {
+<<<<<<< HEAD
         int x = origin->x + directions->items[i]->x;
         int y = origin->y + directions->items[i]->y;
+=======
+        int x = (int)origin->x + directions->items[i]->x;
+        int y = (int)origin->y + directions->items[i]->y;
+>>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 
         int neighbor_index = nodes_index_of(nodes, x, y);
 
