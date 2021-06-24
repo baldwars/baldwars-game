@@ -14,6 +14,9 @@ size_t move_toward_with_moves(size_t, size_t);
 size_t move_away_from(size_t);
 size_t move_away_from_with_moves(size_t, size_t);
 
+// WEAPON
+size_t get_weapon();
+
 // SEARCH
 size_t get_nearest_enemy();
 
