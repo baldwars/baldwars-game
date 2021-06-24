@@ -106,6 +106,39 @@ int linearYObstacleCheck (int a, int b) {
     }
 }
 
+int diagonalObstacleCheck (int x1, int x2, int y) {
+    int j = y;
+    for (int i = x1; i < x2; i++) {
+        if (map[i][j] == -1) {
+            return 1;
+        }
+        j++;
+    }
+    return 0;
+}
+
+int lastObstacleCheckX (int x1, int x2, int y1, int y2) {
+    for (int i = x1+1; i <= x2; i++) {
+        for (int j = y1+1; j < y2; j++) {
+            if (map[i][j] == -1) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int lastObstacleCheckY (int x1, int x2, int y1, int y2) {
+    for (int i = x1+1; i < x2; i++) {
+        for (int j = y1+1; j <= y2; j++) {
+            if (map[i][j] == -1) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 int obstacleInSight (Character *target) {
 
     if (currentPlayer->xPosition == target->xPosition) {
@@ -126,27 +159,13 @@ int obstacleInSight (Character *target) {
                     if (map[currentPlayer->xPosition+1][currentPlayer->yPosition] == map[currentPlayer->xPosition][currentPlayer->yPosition+1] == -1) {
                         return 1;
                     }
-                    j = currentPlayer->yPosition;
-                    for (int i = currentPlayer->xPosition; i < target->xPosition; i++) {
-                        if (map[i][j] == -1) {
-                            return 1;
-                        }
-                        j++;
-                    }
-                    return 0;
+                    return diagonalObstacleCheck(currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition);
                 }
                 else {
                     if (map[currentPlayer->xPosition+1][currentPlayer->yPosition] == map[currentPlayer->xPosition][currentPlayer->yPosition-1] == -1) {
                         return 1;
                     }
-                    j = target->yPosition;
-                    for (int i = currentPlayer->xPosition; i < target->xPosition; i++) {
-                        if (map[i][j] == -1) {
-                            return 1;
-                        }
-                        j++;
-                    }
-                    return 0;
+                    return diagonalObstacleCheck(currentPlayer->xPosition, target->xPosition, target->yPosition);
                 }
             }
             else {
@@ -154,32 +173,17 @@ int obstacleInSight (Character *target) {
                     if (map[currentPlayer->xPosition-1][currentPlayer->yPosition] == map[currentPlayer->xPosition][currentPlayer->yPosition+1] == -1) {
                         return 1;
                     }
-                    j = currentPlayer->yPosition;
-                    for (int i = target->xPosition; i < currentPlayer->xPosition; i++) {
-                        if (map[i][j] == -1) {
-                            return 1;
-                        }
-                        j++;
-                    }
-                    return 0;
+                    return diagonalObstacleCheck(target->xPosition, currentPlayer->xPosition, currentPlayer->yPosition);
                 }
                 else {
                     if (map[currentPlayer->xPosition-1][currentPlayer->yPosition] == map[currentPlayer->xPosition][currentPlayer->yPosition-1] == -1) {
                         return 1;
                     }
-                    j = target->yPosition;
-                    for (int i = target->xPosition; i < currentPlayer->xPosition; i++) {
-                        if (map[i][j] == -1) {
-                            return 1;
-                        }
-                        j++;
-                    }
-                    return 0;
+                    return diagonalObstacleCheck(target->xPosition, currentPlayer->xPosition, target->yPosition);
                 }
             }
 
         }
-
         else {
             if (absX < absY) {
                 if (currentPlayer->xPosition < target->xPosition) {
@@ -187,27 +191,13 @@ int obstacleInSight (Character *target) {
                         if (map[currentPlayer->xPosition][currentPlayer->yPosition+1] == -1) {
                             return 1;
                         }
-                        for (int i = currentPlayer->xPosition+1; i <= target->xPosition; i++) {
-                            for (int j = currentPlayer->yPosition+1; j < target->yPosition; j++) {
-                                if (map[i][j] == -1) {
-                                    return 1;
-                                }
-                            }
-                        }
-                        return 0;
+                        return lastObstacleCheckX(currentPlayer->xPosition, target->yPosition, currentPlayer->yPosition, target->yPosition);
                     }
                     else {
                         if (map[currentPlayer->xPosition][currentPlayer->yPosition-1] == -1) {
                             return 1;
                         }
-                        for (int i = currentPlayer->xPosition+1; i <= target->xPosition; i++) {
-                            for (int j = currentPlayer->yPosition-1; j > target->yPosition; j--) {
-                                if (map[i][j] == -1) {
-                                    return 1;
-                                }
-                            }
-                        }
-                        return 0;
+                        return lastObstacleCheckX(currentPlayer->xPosition, target->yPosition, target->yPosition, currentPlayer->yPosition);
                     }
                 }
                 else {
@@ -215,27 +205,13 @@ int obstacleInSight (Character *target) {
                         if (map[currentPlayer->xPosition][currentPlayer->yPosition+1] == -1) {
                             return 1;
                         }
-                        for (int i = currentPlayer->xPosition-1; i >= target->xPosition; i--) {
-                            for (int j = currentPlayer->yPosition+1; j < target->yPosition; j++) {
-                                if (map[i][j] == -1) {
-                                    return 1;
-                                }
-                            }
-                        }
-                        return 0;
+                        return lastObstacleCheckX(target->xPosition, currentPlayer->yPosition, currentPlayer->yPosition, target->yPosition);
                     }
                     else {
                         if (map[currentPlayer->xPosition][currentPlayer->yPosition-1] == -1) {
                             return 1;
                         }
-                        for (int i = currentPlayer->xPosition-1; i >= target->xPosition; i--) {
-                            for (int j = currentPlayer->yPosition-1; j > target->yPosition; j--) {
-                                if (map[i][j] == -1) {
-                                    return 1;
-                                }
-                            }
-                        }
-                        return 0;
+                        return lastObstacleCheckX(target->xPosition, currentPlayer->yPosition, target->yPosition, currentPlayer->yPosition);
                     }
                 }
             }
@@ -245,27 +221,13 @@ int obstacleInSight (Character *target) {
                         if (map[currentPlayer->xPosition+1][currentPlayer->yPosition] == -1) {
                             return 1;
                         }
-                        for (int i = currentPlayer->xPosition+1; i < target->xPosition; i++) {
-                            for (int j = currentPlayer->yPosition+1; j <= target->yPosition; j++) {
-                                if (map[i][j] == -1) {
-                                    return 1;
-                                }
-                            }
-                        }
-                        return 0;
+                        return lastObstacleCheckY (currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition, target->yPosition);
                     }
                     else {
                         if (map[currentPlayer->xPosition-1][currentPlayer->yPosition] == -1) {
                             return 1;
                         }
-                        for (int i = currentPlayer->xPosition+1; i < target->xPosition; i++) {
-                            for (int j = currentPlayer->yPosition-1; j >= target->yPosition; j--) {
-                                if (map[i][j] == -1) {
-                                    return 1;
-                                }
-                            }
-                        }
-                        return 0;
+                        return lastObstacleCheckY (currentPlayer->xPosition, target->xPosition, target->yPosition, currentPlayer->yPosition);
                     }
                 }
                 else {
@@ -273,27 +235,13 @@ int obstacleInSight (Character *target) {
                         if (map[currentPlayer->xPosition+1][currentPlayer->yPosition] == -1) {
                             return 1;
                         }
-                        for (int i = currentPlayer->xPosition-1; i > target->xPosition; i--) {
-                            for (int j = currentPlayer->yPosition+1; j <= target->yPosition; j++) {
-                                if (map[i][j] == -1) {
-                                    return 1;
-                                }
-                            }
-                        }
-                        return 0;
+                        return lastObstacleCheckY (target->xPosition, currentPlayer->xPosition, currentPlayer->yPosition, target->yPosition);
                     }
                     else {
                         if (map[currentPlayer->xPosition-1][currentPlayer->yPosition] == -1) {
                             return 1;
                         }
-                        for (int i = currentPlayer->xPosition-1; i > target->xPosition; i--) {
-                            for (int j = currentPlayer->yPosition-1; j >= target->yPosition; j--) {
-                                if (map[i][j] == -1) {
-                                    return 1;
-                                }
-                            }
-                        }
-                        return 0;
+                        return lastObstacleCheckY (target->xPosition, currentPlayer->xPosition, target->yPosition, currentPlayer->yPosition);
                     }
                 }
             }
@@ -306,11 +254,9 @@ int canAttack (Character *target) {
     int obs = obstacleInSight(target);
     Weapon w = currentPlayer->weapon;
     if (range == 1 && obs == 0 &&  currentPlayer->actionPoint >= w.cost) {
-        printf("oui");
         return 1;
     }
     else {
-        printf("target can't be hit");
         return 0;
     }
 }
