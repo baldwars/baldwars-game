@@ -22,11 +22,11 @@ struct cell_t {
 
 struct weapon_t {
     size_t id;
-    char *name;
+    const char *name;
     size_t damage;
     size_t cost;
-    size_t minRange;
-    size_t maxRange;
+    size_t min_range;
+    size_t max_range;
 };
 
 struct warrior_t {
@@ -47,7 +47,10 @@ unsigned short cell_is_obstacle(Cell *);
 unsigned short cell_is_entity(Cell *);
 
 // WEAPON
-Weapon_ *weapon_init();
+Weapon *weapon_init(size_t, const char *, size_t, size_t, size_t, size_t);
+Weapon *get_weapon_by_id(size_t);
+Weapon *load_weapon(cJSON *);
+Weapon **load_weapons(size_t *);
 
 // WARRIOR
 Warrior *warrior_init(unsigned short, const char *, size_t, size_t, size_t, size_t);
