@@ -235,6 +235,18 @@ Cell *get_opposite_corner_from(Cell *source)
     }
 }
 
+unsigned short cell_is_obstacle(Cell *target)
+{
+    int value = map_[target->x][target->y];
+    return value == -1;
+}
+
+unsigned short cell_is_entity(Cell *target)
+{
+    int value = map_[target->x][target->y];
+    return value > 0;
+}
+
 Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t health, size_t moves, size_t action)
 {
     Warrior *warrior = malloc(sizeof(Warrior));
@@ -341,7 +353,16 @@ void game_start()
 
             Warrior *enemy = (i == 0) ? warriors_[1] : warriors_[0]; // to delete when user script ready
 
-            move_toward(enemy->id); // to replace by running user script
+            size_t distance = get_distance_between(current_warrior_->cell, enemy->cell);
+
+            if (distance <= 3) {
+                move_away_from(enemy->id);
+            }
+            else {
+                move_toward(enemy->id); // to replace by running user script
+            }
+
+            print_map(map_);
 
             log_warrior(current_warrior_->name);
 
