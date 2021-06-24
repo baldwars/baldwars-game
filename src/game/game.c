@@ -247,6 +247,61 @@ unsigned short cell_is_entity(Cell *target)
     return value > 0;
 }
 
+// WEAPON
+Weapon *weapon_init(size_t id, const char *name, size_t damage, size_t cost, size_t min_range, size_t max_range)
+{
+    Weapon *weapon = malloc(sizeof(Weapon));
+    *weapon = (Weapon){
+        .id = id,
+        .name = name,
+        .damage = damage,
+        .cost = cost,
+        .min_range = min_range,
+        .max_range = max_range
+    };
+
+    return weapon;
+}
+
+Weapon *load_weapon(cJSON *weapon)
+{
+    cJSON *id, *name, *damage, *cost, *min_range, *max_range;
+
+    id = cJSON_GetObjectItemCaseSensitive(weapon, "id");
+    name = cJSON_GetObjectItemCaseSensitive(weapon, "name");
+    damage = cJSON_GetObjectItemCaseSensitive(weapon, "damage");
+    cost = cJSON_GetObjectItemCaseSensitive(weapon, "cost");
+    min_range = cJSON_GetObjectItemCaseSensitive(weapon, "min_range");
+    max_range = cJSON_GetObjectItemCaseSensitive(weapon, "max_range");
+
+    size_t id_val = (size_t)cJSON_GetNumberValue(id);
+    char *name_val = cJSON_GetStringValue(name);
+    size_t damage_val = (size_t)cJSON_GetNumberValue(damage);
+    size_t cost_val = (size_t)cJSON_GetNumberValue(cost);
+    size_t min_range_val = (size_t)cJSON_GetNumberValue(min_range);
+    size_t max_range_val = (size_t)cJSON_GetNumberValue(max_range);
+
+    return weapon_init(id_val, name_val, damage_val, cost_val, min_range_val, max_range_val);
+}
+
+Weapon **load_weapons(size_t *weapons_length)
+{
+    char *buffer = get_file_content("./weapons.json");
+
+    cJSON *item;
+    cJSON *parsed = cJSON_Parse(buffer);
+    *weapons_length = cJSON_GetArraySize(parsed);
+    Weapon **weapons = malloc(sizeof(Warrior *) * (*weapons_length));
+
+    for (int i = 0; i < *weapons_length; ++i)
+    {
+        item = cJSON_GetArrayItem(parsed, i);
+        weapons[i] = load_weapon(item);
+    }
+
+    return weapons;
+}
+
 Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t health, size_t moves, size_t action)
 {
     Warrior *warrior = malloc(sizeof(Warrior));
