@@ -632,6 +632,11 @@ Warrior *get_warrior_by_id(size_t id)
     return NULL;
 }
 
+size_t get_warriors_number()
+{
+    return *warriors_number_;
+}
+
 Warrior **get_warriors()
 {
     return warriors_;

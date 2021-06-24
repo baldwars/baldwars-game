@@ -87,6 +87,7 @@ void log_warrior_action(cJSON *);
 // ACCESSORS
 int **get_map();
 Warrior **get_warriors();
+size_t get_warriors_number();
 Warrior *get_current_warrior();
 Warrior *get_warrior_by_id(size_t);
 size_t get_current_round();
