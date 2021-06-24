@@ -51,6 +51,39 @@ size_t move_toward(size_t id)
     return current_warrior->moves;
 }
 
+size_t move_toward_with_moves(size_t id, size_t moves)
+{
+    Warrior *current_warrior = get_current_warrior();
+    Warrior *enemy = get_warrior_by_id(id);
+    int **map = get_map();
+    Node *target = node_init(enemy->cell->x, enemy->cell->y, 0, 1);
+    Nodes *path = a_star_algorithm(map, current_warrior, target);
+    cJSON *json_path = NULL;
+
+    if (moves > current_warrior->moves) {
+        moves = current_warrior->moves;
+    }
+
+    for (int i = 0; i < moves; ++i) {
+        Node *node = nodes_dequeue(path);
+
+        if (!node || nodes_are_equals(node, target)) {
+            break;
+        }
+
+        update_map(map, current_warrior, node);
+        log_movement(current_warrior->cell, &json_path);
+    }
+
+    size_t json_path_length = cJSON_GetArraySize(json_path);
+
+    if (json_path_length > 0) {
+        log_movements_action(json_path);
+    }
+
+    return current_warrior->moves;
+}
+
 size_t move_away_from(size_t id)
 {
     Warrior *current_warrior = get_current_warrior();
@@ -63,6 +96,42 @@ size_t move_away_from(size_t id)
 
     cJSON *json_path = NULL;
     size_t moves = current_warrior->moves;
+
+    for (int i = 0; i < moves; ++i) {
+        Node *node = nodes_dequeue(path);
+
+        if (!node || nodes_are_equals(node, target)) {
+            break;
+        }
+
+        update_map(map, current_warrior, node);
+        log_movement(current_warrior->cell, &json_path);
+    }
+
+    size_t json_path_length = cJSON_GetArraySize(json_path);
+
+    if (json_path_length > 0) {
+        log_movements_action(json_path);
+    }
+
+    return current_warrior->moves;
+}
+
+size_t move_away_from_with_moves(size_t id, size_t moves)
+{
+    Warrior *current_warrior = get_current_warrior();
+    Warrior *enemy = get_warrior_by_id(id);
+    int **map = get_map();
+
+    Cell *corner = get_opposite_corner_from(enemy->cell);
+    Node *target = node_init(corner->x, corner->y, cell_is_obstacle(corner), cell_is_entity(corner));
+    Nodes *path = a_star_algorithm(map, current_warrior, target);
+
+    cJSON *json_path = NULL;
+
+    if (moves > current_warrior->moves) {
+        moves = current_warrior->moves;
+    }
 
     for (int i = 0; i < moves; ++i) {
         Node *node = nodes_dequeue(path);
