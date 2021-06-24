@@ -160,6 +160,14 @@ size_t get_weapon()
     return (warrior->weapon) ? warrior->weapon->id : 0;
 }
 
+void set_weapon(size_t weapon_id)
+{
+    Warrior *warrior = get_current_warrior();
+    Weapon *weapon = get_weapon_by_id(weapon_id);
+
+    warrior->weapon = weapon;
+}
+
 // SEARCH
 size_t get_nearest_enemy()
 {
