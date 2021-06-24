@@ -351,18 +351,19 @@ void game_start()
             size_t moves = current_warrior_->moves;
             size_t actions = current_warrior_->actions;
 
+            size_t id = get_nearest_enemy(); // to delete when user script ready
+            printf("\nNearest enemy: %u\n", id);
             Warrior *enemy = (i == 0) ? warriors_[1] : warriors_[0]; // to delete when user script ready
-
-            size_t distance = get_distance_between(current_warrior_->cell, enemy->cell);
-
+            size_t distance = get_distance_between(current_warrior_->cell, enemy->cell); // to delete when user script ready
+            // to delete when user script ready
             if (distance <= 3) {
                 move_away_from(enemy->id);
             }
             else {
-                move_toward(enemy->id); // to replace by running user script
+                move_toward(enemy->id);
             }
-
             print_map(map_);
+            // end of block to remove
 
             log_warrior(current_warrior_->name);
 
