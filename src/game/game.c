@@ -265,6 +265,18 @@ Weapon *weapon_init(size_t id, const char *name, size_t damage, size_t cost, siz
     return weapon;
 }
 
+Weapon *get_weapon_by_id(size_t weapon_id)
+{
+    for (int i = 0; i < *weapons_number_; ++i) {
+        Weapon *weapon = weapons_[i];
+        if (weapon->id == weapon_id) {
+            return weapons_[i];
+        }
+    }
+
+    return NULL;
+}
+
 Weapon *load_weapon(cJSON *weapon)
 {
     cJSON *id, *name, *damage, *cost, *min_range, *max_range;
