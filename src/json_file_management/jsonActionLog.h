@@ -1,15 +1,11 @@
-//
-// Created by Latif on 31/05/2021.
-//
-
 #ifndef BALDWARS_JSONACTIONLOG_H
 #define BALDWARS_JSONACTIONLOG_H
-#include "../game_function/game_struct.h"
+#include "../game/game_struct.h"
 #include "cJSON.h"
 
-cJSON *actions;
-void logMovement (cJSON *actions, Character player);
-void logAttack (cJSON *actions, int damage, Character target);
-void logDefence (cJSON *actions, Character *player);
+cJSON *actions_;
+void logMovement (cJSON *, Character);
+void logAttack (cJSON *, int, Character);
+void logDefence (cJSON *, Character *);
 
 #endif //BALDWARS_JSONACTIONLOG_H
