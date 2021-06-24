@@ -12,7 +12,7 @@
 #define WALLS_MAX_RATIO 0.4
 
 typedef struct cell_t Cell;
-typedef struct weapon_t Weapon_;
+typedef struct weapon_t Weapon;
 typedef struct warrior_t Warrior;
 
 struct cell_t {
@@ -21,11 +21,12 @@ struct cell_t {
 };
 
 struct weapon_t {
+    size_t id;
     char *name;
-    int damage;
-    int cost;
-    int minRange;
-    int maxRange;
+    size_t damage;
+    size_t cost;
+    size_t minRange;
+    size_t maxRange;
 };
 
 struct warrior_t {
@@ -35,7 +36,7 @@ struct warrior_t {
     size_t health;
     size_t moves;
     size_t actions;
-    Weapon_ *weapon;
+    Weapon *weapon;
     Cell *cell;
 };
 

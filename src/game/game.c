@@ -55,7 +55,7 @@ void run () {
 
 bool inRange (Character *target) {
     int x, y;
-    Weapon w = currentPlayer->weapon;
+    Weapon_ w = currentPlayer->weapon;
     x = abs(currentPlayer->xPosition - target->xPosition);
     y = abs(currentPlayer->yPosition - target->yPosition);
     if (x + y >= w.minRange && x + y <= w.maxRange) {
@@ -167,7 +167,7 @@ bool canAttack (Character *target) {
 }
 
 void attack (Character *target) {
-    Weapon weapon = currentPlayer->weapon;
+    Weapon_ weapon = currentPlayer->weapon;
     if (!canAttack(target) || currentPlayer->actionPoint < weapon.cost) {
         printf("target can't be hit");
     }
