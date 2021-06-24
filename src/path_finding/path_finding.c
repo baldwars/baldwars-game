@@ -75,7 +75,6 @@ void a_star_search(Nodes *graph, Node *start, Node *goal, HashTable *came_from, 
     hash_table_set_entry(came_from, start, start);
     hash_table_set_entry(cost_so_far, start, &priority_start);
 
-
     while (!priority_queue_is_empty(frontier))
     {
         Node *current = priority_queue_dequeue(frontier);

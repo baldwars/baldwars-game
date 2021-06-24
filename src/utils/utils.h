@@ -8,9 +8,6 @@
 
 typedef struct node_t Node;
 typedef struct nodes_t Nodes;
-typedef struct edge_t Edge;
-typedef struct edges_t Edges;
-typedef struct graph_t Graph;
 typedef struct entry_t Entry;
 typedef struct hash_table_t HashTable;
 typedef struct priority_queue_item_t PQItem;
