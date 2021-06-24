@@ -157,7 +157,7 @@ size_t move_away_from_with_moves(size_t id, size_t moves)
 size_t get_weapon()
 {
     Warrior *warrior = get_current_warrior();
-    return warrior->weapon->id;
+    return (warrior->weapon) ? warrior->weapon->id : 0;
 }
 
 // SEARCH
