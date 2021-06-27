@@ -117,6 +117,37 @@ int diagonalObstacleCheck (int x1, int x2, int y) {
     return 0;
 }
 
+int fullDiagonalObstacleCheck (int x1, int x2, int y1, int y2) {
+    if (x1 < x2) {
+        if (y1 < y2) {
+            if (map[x1+1][y1] == -1 && map[x1][y1+1] == -1) {
+                return 1;
+            }
+            return diagonalObstacleCheck(x1, x2, y1);
+        }
+        else {
+            if (map[x1+1][y1] == -1 && map[x1][y1-1] == -1) {
+                return 1;
+            }
+            return diagonalObstacleCheck(x1, x2, y2);
+        }
+    }
+    else {
+        if (y1 < y2) {
+            if (map[x1-1][y1] == -1 && map[x1][y1+1] == -1) {
+                return 1;
+            }
+            return diagonalObstacleCheck(x2, x1, y1);
+        }
+        else {
+            if (map[x1-1][y1] == -1 && map[x1][y1-1] == -1) {
+                return 1;
+            }
+            return diagonalObstacleCheck(x2, x1, y2);
+        }
+    }
+}
+
 int lastObstacleCheckX (int x1, int x2, int y1, int y2) {
     for (int i = x1+1; i <= x2; i++) {
         for (int j = y1+1; j < y2; j++) {
@@ -128,6 +159,37 @@ int lastObstacleCheckX (int x1, int x2, int y1, int y2) {
     return 0;
 }
 
+int lastObstacleCheckXFull (int x1, int x2, int y1, int y2) {
+    if (x1 < x2) {
+        if (y1 < y2) {
+            if (map[x1][y1+1] == -1) {
+                return 1;
+            }
+            return lastObstacleCheckX(x1, x2, y1, y2);
+        }
+        else {
+            if (map[x1][y1-1] == -1) {
+                return 1;
+            }
+            return lastObstacleCheckX(x1, x2, y2, y1);
+        }
+    }
+    else {
+        if (y1 < y2) {
+            if (map[x1][y1+1] == -1) {
+                return 1;
+            }
+            return lastObstacleCheckX(x2, x1, y1, y2);
+        }
+        else {
+            if (map[x1][y1-1] == -1) {
+                return 1;
+            }
+            return lastObstacleCheckX(x2, x1, y2, y1);
+        }
+    }
+}
+
 int lastObstacleCheckY (int x1, int x2, int y1, int y2) {
     for (int i = x1+1; i < x2; i++) {
         for (int j = y1+1; j <= y2; j++) {
@@ -137,6 +199,37 @@ int lastObstacleCheckY (int x1, int x2, int y1, int y2) {
         }
     }
     return 0;
+}
+
+int lastObstacleCheckYFull (int x1, int x2, int y1, int y2) {
+    if (x1 < x2) {
+        if (y1 < y2) {
+            if (map[x1+1][y1] == -1) {
+                return 1;
+            }
+            return lastObstacleCheckY (x1, x2, y1, y2);
+        }
+        else {
+            if (map[x1-1][y1] == -1) {
+                return 1;
+            }
+            return lastObstacleCheckY (x1, x2, y2, y1);
+        }
+    }
+    else {
+        if (y1 < y2) {
+            if (map[x1+1][y1] == -1) {
+                return 1;
+            }
+            return lastObstacleCheckY (x2, x1, y1, y2);
+        }
+        else {
+            if (map[x1-1][y1] == -1) {
+                return 1;
+            }
+            return lastObstacleCheckY (x2, x1, y2, y1);
+        }
+    }
 }
 
 int obstacleInSight (Character *target) {
@@ -153,97 +246,14 @@ int obstacleInSight (Character *target) {
         int absX = abs(currentPlayer->xPosition - target->xPosition);
         int absY = abs(currentPlayer->yPosition - target->yPosition);
         if (absX == absY) {
-            int j;
-            if (currentPlayer->xPosition < target->xPosition) {
-                if (currentPlayer->yPosition < target->yPosition) {
-                    if (map[currentPlayer->xPosition+1][currentPlayer->yPosition] == map[currentPlayer->xPosition][currentPlayer->yPosition+1] == -1) {
-                        return 1;
-                    }
-                    return diagonalObstacleCheck(currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition);
-                }
-                else {
-                    if (map[currentPlayer->xPosition+1][currentPlayer->yPosition] == map[currentPlayer->xPosition][currentPlayer->yPosition-1] == -1) {
-                        return 1;
-                    }
-                    return diagonalObstacleCheck(currentPlayer->xPosition, target->xPosition, target->yPosition);
-                }
-            }
-            else {
-                if (currentPlayer->yPosition < target->yPosition) {
-                    if (map[currentPlayer->xPosition-1][currentPlayer->yPosition] == map[currentPlayer->xPosition][currentPlayer->yPosition+1] == -1) {
-                        return 1;
-                    }
-                    return diagonalObstacleCheck(target->xPosition, currentPlayer->xPosition, currentPlayer->yPosition);
-                }
-                else {
-                    if (map[currentPlayer->xPosition-1][currentPlayer->yPosition] == map[currentPlayer->xPosition][currentPlayer->yPosition-1] == -1) {
-                        return 1;
-                    }
-                    return diagonalObstacleCheck(target->xPosition, currentPlayer->xPosition, target->yPosition);
-                }
-            }
-
+            return fullDiagonalObstacleCheck(currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition, target->yPosition);
         }
         else {
             if (absX < absY) {
-                if (currentPlayer->xPosition < target->xPosition) {
-                    if (currentPlayer->yPosition < target->yPosition) {
-                        if (map[currentPlayer->xPosition][currentPlayer->yPosition+1] == -1) {
-                            return 1;
-                        }
-                        return lastObstacleCheckX(currentPlayer->xPosition, target->yPosition, currentPlayer->yPosition, target->yPosition);
-                    }
-                    else {
-                        if (map[currentPlayer->xPosition][currentPlayer->yPosition-1] == -1) {
-                            return 1;
-                        }
-                        return lastObstacleCheckX(currentPlayer->xPosition, target->yPosition, target->yPosition, currentPlayer->yPosition);
-                    }
-                }
-                else {
-                    if (currentPlayer->yPosition < target->yPosition) {
-                        if (map[currentPlayer->xPosition][currentPlayer->yPosition+1] == -1) {
-                            return 1;
-                        }
-                        return lastObstacleCheckX(target->xPosition, currentPlayer->yPosition, currentPlayer->yPosition, target->yPosition);
-                    }
-                    else {
-                        if (map[currentPlayer->xPosition][currentPlayer->yPosition-1] == -1) {
-                            return 1;
-                        }
-                        return lastObstacleCheckX(target->xPosition, currentPlayer->yPosition, target->yPosition, currentPlayer->yPosition);
-                    }
-                }
+                lastObstacleCheckXFull (currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition, target->yPosition);
             }
             else {
-                if (currentPlayer->xPosition < target->xPosition) {
-                    if (currentPlayer->yPosition < target->yPosition) {
-                        if (map[currentPlayer->xPosition+1][currentPlayer->yPosition] == -1) {
-                            return 1;
-                        }
-                        return lastObstacleCheckY (currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition, target->yPosition);
-                    }
-                    else {
-                        if (map[currentPlayer->xPosition-1][currentPlayer->yPosition] == -1) {
-                            return 1;
-                        }
-                        return lastObstacleCheckY (currentPlayer->xPosition, target->xPosition, target->yPosition, currentPlayer->yPosition);
-                    }
-                }
-                else {
-                    if (currentPlayer->yPosition < target->yPosition) {
-                        if (map[currentPlayer->xPosition+1][currentPlayer->yPosition] == -1) {
-                            return 1;
-                        }
-                        return lastObstacleCheckY (target->xPosition, currentPlayer->xPosition, currentPlayer->yPosition, target->yPosition);
-                    }
-                    else {
-                        if (map[currentPlayer->xPosition-1][currentPlayer->yPosition] == -1) {
-                            return 1;
-                        }
-                        return lastObstacleCheckY (target->xPosition, currentPlayer->xPosition, target->yPosition, currentPlayer->yPosition);
-                    }
-                }
+                lastObstacleCheckYFull (currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition, target->yPosition);
             }
         }
     }
