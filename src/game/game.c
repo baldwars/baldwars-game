@@ -53,12 +53,14 @@ void run () {
 
 
 
-int inRange (Character *target) {
+size_t inRange (Warrior *current, Warrior *enemy) {
     int x, y;
-    Weapon w = currentPlayer->weapon;
-    x = abs(currentPlayer->xPosition - target->xPosition);
-    y = abs(currentPlayer->yPosition - target->yPosition);
-    if (x + y >= w.minRange && x + y <= w.maxRange) {
+    Cell *current_cell = current->cell;
+    Cell *enemy_cell = enemy->cell;
+    Weapon_ *w = current->weapon;
+    x = abs(current_cell->x - enemy_cell->x);
+    y = abs(current_cell->y - enemy_cell->y);
+    if (x + y >= w->minRange && x + y <= w->maxRange) {
         printf("in range");
         return 1;
     } else {
@@ -67,10 +69,10 @@ int inRange (Character *target) {
     }
 }
 
-int linearXObstacleCheck (int a, int b) {
+size_t linearXObstacleCheck (size_t a, size_t b, size_t x, int** m) {
     if (a < b) {
         for (int j = a; j < b; j++) {
-            if (map[currentPlayer->xPosition][j] == -1) {
+            if (m[x][j] == -1) {
                 return 1;
             }
         }
@@ -78,7 +80,7 @@ int linearXObstacleCheck (int a, int b) {
     }
     else {
         for (int j = b; j < a; j++) {
-            if (map[currentPlayer->xPosition][j] == -1) {
+            if (m[x][j] == -1) {
                 return 1;
             }
         }
@@ -86,10 +88,10 @@ int linearXObstacleCheck (int a, int b) {
     }
 }
 
-int linearYObstacleCheck (int a, int b) {
+size_t linearYObstacleCheck (size_t a, size_t b, size_t y, int** m) {
     if (a < b) {
         for (int i = a; i < b; i++) {
-            if (map[i][currentPlayer->yPosition] == -1) {
+            if (m[i][y] == -1) {
                 return 1;
             }
         }
@@ -98,7 +100,7 @@ int linearYObstacleCheck (int a, int b) {
 
     else {
         for (int i = b; i < a; i++) {
-            if (map[i][currentPlayer->yPosition] == -1) {
+            if (m[i][y] == -1) {
                 return 1;
             }
         }
@@ -106,10 +108,10 @@ int linearYObstacleCheck (int a, int b) {
     }
 }
 
-int diagonalObstacleCheck (int x1, int x2, int y) {
+size_t diagonalObstacleCheck (size_t x1, size_t x2, size_t y, int** m) {
     int j = y;
     for (int i = x1; i < x2; i++) {
-        if (map[i][j] == -1) {
+        if (m[i][j] == -1) {
             return 1;
         }
         j++;
@@ -117,41 +119,41 @@ int diagonalObstacleCheck (int x1, int x2, int y) {
     return 0;
 }
 
-int fullDiagonalObstacleCheck (int x1, int x2, int y1, int y2) {
+size_t fullDiagonalObstacleCheck (size_t x1, size_t x2, size_t y1, size_t y2, int** m) {
     if (x1 < x2) {
         if (y1 < y2) {
-            if (map[x1+1][y1] == -1 && map[x1][y1+1] == -1) {
+            if (m[x1+1][y1] == -1 && m[x1][y1+1] == -1) {
                 return 1;
             }
-            return diagonalObstacleCheck(x1, x2, y1);
+            return diagonalObstacleCheck(x1, x2, y1, m);
         }
         else {
-            if (map[x1+1][y1] == -1 && map[x1][y1-1] == -1) {
+            if (m[x1+1][y1] == -1 && m[x1][y1-1] == -1) {
                 return 1;
             }
-            return diagonalObstacleCheck(x1, x2, y2);
+            return diagonalObstacleCheck(x1, x2, y2, m);
         }
     }
     else {
         if (y1 < y2) {
-            if (map[x1-1][y1] == -1 && map[x1][y1+1] == -1) {
+            if (m[x1-1][y1] == -1 && m[x1][y1+1] == -1) {
                 return 1;
             }
-            return diagonalObstacleCheck(x2, x1, y1);
+            return diagonalObstacleCheck(x2, x1, y1, m);
         }
         else {
-            if (map[x1-1][y1] == -1 && map[x1][y1-1] == -1) {
+            if (m[x1-1][y1] == -1 && m[x1][y1-1] == -1) {
                 return 1;
             }
-            return diagonalObstacleCheck(x2, x1, y2);
+            return diagonalObstacleCheck(x2, x1, y2, m);
         }
     }
 }
 
-int lastObstacleCheckX (int x1, int x2, int y1, int y2) {
+size_t lastObstacleCheckX (size_t x1, size_t x2, size_t y1, size_t y2, int** m) {
     for (int i = x1+1; i <= x2; i++) {
         for (int j = y1+1; j < y2; j++) {
-            if (map[i][j] == -1) {
+            if (m[i][j] == -1) {
                 return 1;
             }
         }
@@ -159,41 +161,41 @@ int lastObstacleCheckX (int x1, int x2, int y1, int y2) {
     return 0;
 }
 
-int lastObstacleCheckXFull (int x1, int x2, int y1, int y2) {
+size_t lastObstacleCheckXFull (size_t x1, size_t x2, size_t y1, size_t y2, int** m) {
     if (x1 < x2) {
         if (y1 < y2) {
-            if (map[x1][y1+1] == -1) {
+            if (m[x1][y1+1] == -1) {
                 return 1;
             }
-            return lastObstacleCheckX(x1, x2, y1, y2);
+            return lastObstacleCheckX(x1, x2, y1, y2, m);
         }
         else {
-            if (map[x1][y1-1] == -1) {
+            if (m[x1][y1-1] == -1) {
                 return 1;
             }
-            return lastObstacleCheckX(x1, x2, y2, y1);
+            return lastObstacleCheckX(x1, x2, y2, y1, m);
         }
     }
     else {
         if (y1 < y2) {
-            if (map[x1][y1+1] == -1) {
+            if (m[x1][y1+1] == -1) {
                 return 1;
             }
-            return lastObstacleCheckX(x2, x1, y1, y2);
+            return lastObstacleCheckX(x2, x1, y1, y2, m);
         }
         else {
-            if (map[x1][y1-1] == -1) {
+            if (m[x1][y1-1] == -1) {
                 return 1;
             }
-            return lastObstacleCheckX(x2, x1, y2, y1);
+            return lastObstacleCheckX(x2, x1, y2, y1, m);
         }
     }
 }
 
-int lastObstacleCheckY (int x1, int x2, int y1, int y2) {
+size_t lastObstacleCheckY (size_t x1, size_t x2, size_t y1, size_t y2, int** m) {
     for (int i = x1+1; i < x2; i++) {
         for (int j = y1+1; j <= y2; j++) {
-            if (map[i][j] == -1) {
+            if (m[i][j] == -1) {
                 return 1;
             }
         }
@@ -201,65 +203,66 @@ int lastObstacleCheckY (int x1, int x2, int y1, int y2) {
     return 0;
 }
 
-int lastObstacleCheckYFull (int x1, int x2, int y1, int y2) {
+size_t lastObstacleCheckYFull (size_t x1, size_t x2, size_t y1, size_t y2, int** m) {
     if (x1 < x2) {
         if (y1 < y2) {
-            if (map[x1+1][y1] == -1) {
+            if (m[x1+1][y1] == -1) {
                 return 1;
             }
-            return lastObstacleCheckY (x1, x2, y1, y2);
+            return lastObstacleCheckY (x1, x2, y1, y2, m);
         }
         else {
-            if (map[x1-1][y1] == -1) {
+            if (m[x1-1][y1] == -1) {
                 return 1;
             }
-            return lastObstacleCheckY (x1, x2, y2, y1);
+            return lastObstacleCheckY (x1, x2, y2, y1, m);
         }
     }
     else {
         if (y1 < y2) {
-            if (map[x1+1][y1] == -1) {
+            if (m[x1+1][y1] == -1) {
                 return 1;
             }
-            return lastObstacleCheckY (x2, x1, y1, y2);
+            return lastObstacleCheckY (x2, x1, y1, y2, m);
         }
         else {
-            if (map[x1-1][y1] == -1) {
+            if (m[x1-1][y1] == -1) {
                 return 1;
             }
-            return lastObstacleCheckY (x2, x1, y2, y1);
+            return lastObstacleCheckY (x2, x1, y2, y1, m);
         }
     }
 }
 
-int obstacleInSight (Character *target) {
-
-    if (currentPlayer->xPosition == target->xPosition) {
-        linearXObstacleCheck(currentPlayer->yPosition, target->yPosition);
+size_t obstacleInSight (Warrior *current, Warrior *enemy, int** m) {
+    Cell *current_cell = current->cell;
+    Cell *enemy_cell = enemy->cell;
+    if (current_cell->x == enemy_cell->x) {
+        linearXObstacleCheck(current_cell->y, enemy_cell->y, current_cell->x, m);
     }
 
-    else if (currentPlayer->yPosition == target->yPosition) {
-        linearYObstacleCheck(currentPlayer->xPosition, target->xPosition);
+    else if (current_cell->y == enemy_cell->y) {
+        linearYObstacleCheck(current_cell->x, enemy_cell->x, current_cell->y, m);
     }
 
     else {
-        int absX = abs(currentPlayer->xPosition - target->xPosition);
-        int absY = abs(currentPlayer->yPosition - target->yPosition);
+        int absX = abs(current_cell->x - enemy_cell->x);
+        int absY = abs(current_cell->y - enemy_cell->y);
         if (absX == absY) {
-            return fullDiagonalObstacleCheck(currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition, target->yPosition);
+            return fullDiagonalObstacleCheck(current_cell->x, enemy_cell->x, current_cell->y, enemy_cell->y, m);
         }
         else {
             if (absX < absY) {
-                lastObstacleCheckXFull (currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition, target->yPosition);
+                lastObstacleCheckXFull (current_cell->x, enemy_cell->x, current_cell->y, enemy_cell->y, m);
             }
             else {
-                lastObstacleCheckYFull (currentPlayer->xPosition, target->xPosition, currentPlayer->yPosition, target->yPosition);
+                lastObstacleCheckYFull (current_cell->x, enemy_cell->x, current_cell->y, enemy_cell->y, m);
             }
         }
     }
 }
 
-int canAttack (Character *target) {
+/*int canAttack (Character *target) {
     int range = inRange(target);
     int obs = obstacleInSight(target);
     Weapon w = currentPlayer->weapon;
@@ -283,7 +286,7 @@ void attack (Character *target) {
         printf("\n %d %d %d", weapon.id, damage, weapon.cost);
         logAttack(actions, weapon.id, damage, weapon.cost);
     }
-}
+}*/
 
 void defend () {
     currentPlayer->armor = 5;
@@ -450,6 +453,7 @@ void game_start()
 
     while (!fight_is_over) {
         json_warriors_ = NULL;
+        printf("i");
         for (int i = 0; i < *warriors_number_; ++i) {
             json_current_warrior_actions_ = NULL;
             current_warrior_ = warriors_[i];
@@ -463,10 +467,14 @@ void game_start()
             size_t distance = get_distance_between(current_warrior_->cell, enemy->cell); // to delete when user script ready
             // to delete when user script ready
             if (distance <= 3) {
+                printf("a");
                 move_away_from(enemy->id);
             }
             else {
+                printf("b");
+                attack(enemy->id);
                 move_toward(enemy->id);
+
             }
             print_map(map_);
             // end of block to remove

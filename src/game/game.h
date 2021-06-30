@@ -101,7 +101,9 @@ void deleteMap (int index);
 void setupMap (int index);
 void loadScript();
 void run ();
-bool inRange (Character *target);
+// ATTACK
+size_t inRange (Warrior *current, Warrior *enemy);
+size_t obstacleInSight (Warrior *current, Warrior *enemy, int** m);
 
 
 #endif //BALDWARS_GAME_GAME_FUNCTION_H

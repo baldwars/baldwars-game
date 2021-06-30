@@ -176,3 +176,37 @@ size_t get_nearest_enemy()
 
     return nearest_enemy;
 }
+
+size_t canAttack (size_t id) {
+    Warrior *current_warrior = get_current_warrior();
+    Warrior *enemy = get_warrior_by_id(id);
+    int** map_ = get_map();
+    int range = inRange(current_warrior, enemy);
+    int obs = obstacleInSight(current_warrior, enemy, map_);
+    Weapon_ *w = current_warrior->weapon;
+    if (range == 1 && obs == 0 &&  current_warrior->actions >= w->cost) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+size_t attack (size_t id) {
+    printf("o");
+    if (canAttack(id) == 0) {
+        printf("target can't be hit");
+        return  0;
+    }
+    else {
+        Warrior *current_warrior = get_current_warrior();
+        Weapon *weapon = current_warrior->weapon;
+        Warrior *enemy = get_warrior_by_id(id);
+        int damage = weapon->damage;
+        enemy->health = enemy->health - (damage);
+        printf("remaining hp %d", enemy->health);
+        printf("\n %c %d %d", weapon->name, damage, weapon->cost);
+        //logAttack(actions, weapon->id, damage, weapon.cost);
+        return current_warrior->actions;
+    }
+}

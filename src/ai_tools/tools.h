@@ -17,5 +17,8 @@ size_t move_away_from_with_moves(size_t, size_t);
 // SEARCH
 size_t get_nearest_enemy();
 
+// ATTACK
+size_t canAttack (size_t id);
+size_t attack (size_t id);
 
 #endif //BALDWARS_GAME_TOOLS_H

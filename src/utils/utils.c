@@ -1,55 +1,8 @@
 #include <stdio.h>
 #include "utils.h"
 
-<<<<<<< HEAD
-Edge edge_init(Node from, Node to, size_t weight)
-{
-    Edge *edge = malloc(sizeof(Edge));
-    *edge = (Edge){
-            .from = from,
-            .to = to,
-            .weight = weight
-    };
 
-    return *edge;
-}
-
-Edges edges_init_alloc(size_t capacity)
-{
-    Edges *edges = malloc(sizeof(Edges));
-    *edges = (Edges){
-            .length = 0,
-            .capacity = capacity,
-            .items = malloc(sizeof(Edge) * capacity)
-    };
-
-    return *edges;
-}
-
-Edges edges_init()
-{
-    return edges_init_alloc(1);
-}
-
-void edges_check_alloc(Edges *edges)
-{
-    if (edges->length >= edges->capacity)
-    {
-        edges->capacity += (edges->capacity < CAPACITY_LIMIT) ? edges->capacity : CAPACITY_LIMIT;
-        edges->items = realloc(edges->items, (sizeof(Edge *) * edges->capacity));
-    }
-}
-
-void edges_push_back(Edges *edges, Edge value)
-{
-    edges_check_alloc(edges);
-    edges->items[edges->length++] = value;
-}
-
-Node *node_init(int x, int y, unsigned short is_obstacle, unsigned short is_entity)
-=======
 Node *node_init(size_t x, size_t y, unsigned short is_obstacle, unsigned short is_entity)
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 {
     Node *node = malloc(sizeof(Node));
     *node = (Node){
@@ -95,12 +48,8 @@ void nodes_push_back(Nodes *nodes, Node *value)
 
 unsigned short nodes_are_equals(Node *a, Node *b)
 {
-<<<<<<< HEAD
-    return (a->x == b->x)
-=======
     return a && b
         && (a->x == b->x)
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
         && (a->y == b->y)
         && (a->is_obstacle == b->is_obstacle)
         && (a->is_entity == b->is_entity);
@@ -129,27 +78,7 @@ Nodes *nodes_reverse(Nodes *nodes)
     return reversed;
 }
 
-<<<<<<< HEAD
-Graph graph_init_alloc(size_t nodes_capacity, size_t edges_capacity)
-{
-    Graph *graph = malloc(sizeof(Graph));
-    *graph = (Graph){
-            .nodes = nodes_init_alloc(nodes_capacity),
-            .edges = edges_init_alloc(edges_capacity)
-    };
-
-    return *graph;
-}
-
-Graph graph_init()
-{
-    return graph_init_alloc(1, 1);
-}
-
-int nodes_index_of(Nodes *nodes, int x, int y)
-=======
 int nodes_index_of(Nodes *nodes, size_t x, size_t y)
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 {
     for (int i = 0; i < nodes->length; ++i) {
         if (nodes->items[i]->x == x && nodes->items[i]->y == y)
@@ -197,11 +126,7 @@ void print_nodes(Nodes *nodes)
 
 unsigned short nodes_is_empty(Nodes *nodes)
 {
-<<<<<<< HEAD
-    return nodes->length == 0;
-=======
     return !nodes || nodes->length == 0;
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 }
 
 Node *nodes_dequeue(Nodes *nodes)
@@ -219,7 +144,7 @@ Node *nodes_dequeue(Nodes *nodes)
     return first;
 }
 
-unsigned int hash_node(Node *node)
+size_t hash_node(Node *node)
 {
     unsigned int hash = (node->y << 16) ^ node->x;
     hash %= HASH_TABLE_CAPACITY;
@@ -241,10 +166,6 @@ Entry *entry_init(Node *key, void *value)
 HashTable *hash_table_init()
 {
     HashTable *hash_table = malloc(sizeof(HashTable));
-<<<<<<< HEAD
-=======
-    hash_table->count = 0;
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
     hash_table->entries = malloc(sizeof(Entry *) * HASH_TABLE_CAPACITY);
 
     for (int i = 0; i < HASH_TABLE_CAPACITY; ++i) {
@@ -261,10 +182,7 @@ void hash_table_set_entry(HashTable *hashtable, Node *key, void *value)
 
     if (entry == NULL) {
         hashtable->entries[slot] = entry_init(key, value);
-<<<<<<< HEAD
-=======
-        hashtable->count++;
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
+
         return;
     }
 
@@ -280,10 +198,7 @@ void hash_table_set_entry(HashTable *hashtable, Node *key, void *value)
         entry = prev->next;
     }
     prev->next = entry_init(key, value);
-<<<<<<< HEAD
-=======
-    hashtable->count++;
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
+
 }
 
 void *hash_table_get_entry_value_by_key(HashTable *hashtable, Node *key)
@@ -420,11 +335,8 @@ void print_int_hash_table(HashTable *hash_table)
     }
 }
 
-<<<<<<< HEAD
-PQItem *pq_item_init(Node *value, int priority)
-=======
+
 PQItem *pq_item_init(Node *value, size_t priority)
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
 {
     PQItem *item = malloc(sizeof(PQItem));
 
@@ -463,38 +375,18 @@ void priority_queue_check_alloc(PriorityQueue *queue)
     }
 }
 
-<<<<<<< HEAD
-size_t priority_queue_peek(PriorityQueue *queue)
-{
-    int lowest_priority = INT_MAX;
-//    int highest_priority = INT_MIN;
-=======
+
 int priority_queue_peek(PriorityQueue *queue)
 {
     size_t lowest_priority = INT_MAX;
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
     int index = -1;
 
     for (int i = 0; i < queue->length; ++i) {
         PQItem *item_i = queue->items[i];
-<<<<<<< HEAD
-        PQItem *item_index = queue->items[index];
-        if ((lowest_priority == item_i->priority
-//        if ((highest_priority == item_i->priority
-            && index >= 0
-//            && item_i
-//            && hash_node(queue->items[index]->value) < hash_node(queue->items[i]->value)
-            )
-            || (lowest_priority > item_i->priority))
-//            || (highest_priority < item_i->priority))
-        {
-            lowest_priority = queue->items[i]->priority;
-//            highest_priority = queue->items[i]->priority;
-=======
+
         if ((lowest_priority == item_i->priority && index >= 0) || (lowest_priority > item_i->priority))
         {
             lowest_priority = queue->items[i]->priority;
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
             index = i;
         }
     }
@@ -527,8 +419,7 @@ unsigned short priority_queue_is_empty(PriorityQueue *queue)
 {
     return queue->length == 0;
 }
-<<<<<<< HEAD
-=======
+
 
 char *get_file_content(char * path)
 {
@@ -542,4 +433,3 @@ char *get_file_content(char * path)
 
     return buffer;
 }
->>>>>>> 8f6ceebeba5ed8a1bf0ce3d834d0d0f588a735e8
