@@ -26,6 +26,8 @@ int **map_;
 Warrior *current_warrior_;
 Warrior **warriors_;
 size_t *warriors_number_;
+Weapon_ **weapons_;
+size_t *weapons_number_;
 
 cJSON *json_rounds_;
 cJSON *json_warriors_;
@@ -60,6 +62,7 @@ size_t inRange (Warrior *current, Warrior *enemy) {
     Weapon_ *w = current->weapon;
     x = abs(current_cell->x - enemy_cell->x);
     y = abs(current_cell->y - enemy_cell->y);
+    printf("o");
     if (x + y >= w->minRange && x + y <= w->maxRange) {
         printf("in range");
         return 1;
@@ -293,14 +296,6 @@ void defend () {
     logDefence(actions_, currentPlayer);
 }
 
-void moveToEnemy (Character target) {
-
-
-}
-
-void moveFromEnemy (Character target) {
-
-}
 
 void writeJSON (char *string) {
     FILE *jsonFile;
@@ -373,6 +368,7 @@ Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t 
     return warrior;
 }
 
+
 Warrior *load_warrior(cJSON *warrior)
 {
     cJSON *id, *name, *level, *health, *moves, *actions;
@@ -396,7 +392,7 @@ Warrior *load_warrior(cJSON *warrior)
 
 Warrior **load_warriors(size_t *warriors_length)
 {
-    char *buffer = get_file_content("./warriors.json");
+    char *buffer = get_file_content("C:/Users/Latif/P-A/BaldWars-Game/src/warriors.json");
 
     cJSON *item;
     cJSON *parsed = cJSON_Parse(buffer);
@@ -412,10 +408,62 @@ Warrior **load_warriors(size_t *warriors_length)
     return warriors;
 }
 
+Weapon_ *weapon_init(const char *name, size_t damage, size_t cost, size_t minRange, size_t maxRange)
+{
+    Weapon_ *weapon = malloc(sizeof(Weapon_));
+    *weapon = (Weapon_){
+            .name = name,
+            .damage = damage,
+            .cost = cost,
+            .minRange = minRange,
+            .maxRange = maxRange
+    };
+
+    return weapon;
+}
+
+Weapon_ *load_weapon(cJSON *weapon)
+{
+    cJSON *name, *damage, *cost, *minRange, *maxRange;
+
+    name = cJSON_GetObjectItemCaseSensitive(weapon, "name");
+    damage = cJSON_GetObjectItemCaseSensitive(weapon, "damage");
+    cost = cJSON_GetObjectItemCaseSensitive(weapon, "cost");
+    minRange = cJSON_GetObjectItemCaseSensitive(weapon, "minRange");
+    maxRange = cJSON_GetObjectItemCaseSensitive(weapon, "maxRange");
+
+    char *name_val = cJSON_GetStringValue(name);
+    size_t damage_val = (size_t)cJSON_GetNumberValue(damage);
+    size_t cost_val = (size_t)cJSON_GetNumberValue(cost);
+    size_t minRange_val = (size_t)cJSON_GetNumberValue(minRange);
+    size_t maxRange_val = (size_t)cJSON_GetNumberValue(maxRange);
+
+    return weapon_init(name_val, damage_val, cost_val, minRange_val, maxRange_val);
+}
+
+Weapon_ **load_weapons(size_t *weapons_length)
+{
+    char *buffer = get_file_content("C:/Users/Latif/P-A/BaldWars-Game/src/weapons.json");
+
+    cJSON *item;
+    cJSON *parsed = cJSON_Parse(buffer);
+    *weapons_length = cJSON_GetArraySize(parsed);
+    Weapon_ **weapons = malloc(sizeof(Weapon_ *) * (*weapons_length));
+
+    for (int i = 0; i < *weapons_length; ++i)
+    {
+        item = cJSON_GetArrayItem(parsed, i);
+        weapons[i] = load_weapon(item);
+    }
+
+    return weapons;
+}
+
 void reset_warrior_action_stats(Warrior *warrior, size_t moves, size_t actions)
 {
     warrior->moves = moves;
     warrior->actions = actions;
+    warrior->weapon = NULL;
 }
 
 unsigned short map_is_valid(int **map)
@@ -443,12 +491,15 @@ void game_start()
 {
     warriors_number_ = malloc(sizeof(size_t));
     warriors_ = load_warriors(warriors_number_);
+    weapons_number_ = malloc(sizeof(size_t));
+    weapons_ = load_weapons(weapons_number_);
+    printf("\n %s \n", weapons_[0]->name);
 
     map_ = generate_map(warriors_, *warriors_number_);
     print_map(map_);
 
     size_t current_round = 1;
-    size_t round_limit = 2;
+    size_t round_limit = 4;
     unsigned short fight_is_over = 0;
 
     while (!fight_is_over) {
@@ -468,11 +519,14 @@ void game_start()
             // to delete when user script ready
             if (distance <= 3) {
                 printf("a");
+                draw_weapon("handgun");
+                attack(enemy->id);
+                //printf("\n enemy health %zu \n", enemy->health);
                 move_away_from(enemy->id);
             }
             else {
                 printf("b");
-                attack(enemy->id);
+                printf("\nN\n");
                 move_toward(enemy->id);
 
             }
@@ -665,6 +719,30 @@ cJSON *log_attack_action(size_t weapon_id)
     return json_action;
 }
 
+void *log_attack_action1(size_t damage, size_t cost, size_t remaining_life)
+{
+    cJSON *json_action = cJSON_CreateObject();
+    cJSON_AddStringToObject(json_action, "type", "attack");
+    cJSON *json_attack_result = cJSON_CreateObject();
+    cJSON *damage_inflicted = cJSON_CreateNumber(damage);
+    cJSON_AddItemToObject(json_attack_result, "damages inflicted", damage_inflicted);
+    cJSON *weapon_cost = cJSON_CreateNumber(cost);
+    cJSON_AddItemToObject(json_attack_result, "action cost", weapon_cost);
+    cJSON *target_remaining_life = cJSON_CreateNumber(remaining_life);
+    cJSON_AddItemToObject(json_attack_result, "target remaining life", target_remaining_life);
+    cJSON_AddItemToObject(json_action, "attack result", json_attack_result);
+
+    log_warrior_action(json_action);
+}
+
+void *log_weapon_drawing(char *weapon_name)
+{
+    cJSON *json_action = cJSON_CreateObject();
+    cJSON_AddStringToObject(json_action, "type", "draw");
+    cJSON_AddStringToObject(json_action, "weapon", weapon_name);
+    log_warrior_action(json_action);
+}
+
 void log_warrior_action(cJSON *warrior_action)
 {
     if (!json_current_warrior_actions_) {
@@ -755,6 +833,21 @@ size_t get_warriors_number()
 Warrior **get_warriors()
 {
     return warriors_;
+}
+
+Weapon_ **get_weapons()
+{
+    return weapons_;
+}
+
+void set_weapon (Weapon_ *w)
+{
+    current_warrior_->weapon = w;
+}
+
+size_t get_weapons_number()
+{
+    return *weapons_number_;
 }
 
 // SEARCH

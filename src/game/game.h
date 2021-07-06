@@ -22,10 +22,10 @@ struct cell_t {
 
 struct weapon_t {
     char *name;
-    int damage;
-    int cost;
-    int minRange;
-    int maxRange;
+    size_t damage;
+    size_t cost;
+    size_t minRange;
+    size_t maxRange;
 };
 
 struct warrior_t {
@@ -46,7 +46,7 @@ unsigned short cell_is_obstacle(Cell *);
 unsigned short cell_is_entity(Cell *);
 
 // WEAPON
-Weapon_ *weapon_init();
+Weapon_ *weapon_init(const char *name, size_t damage, size_t cost, size_t minRange, size_t maxRange);
 
 // WARRIOR
 Warrior *warrior_init(unsigned short, const char *, size_t, size_t, size_t, size_t);
@@ -83,6 +83,8 @@ void log_round(size_t);
 void log_warriors(cJSON *);
 void log_warrior(const char *);
 void log_warrior_action(cJSON *);
+void *log_attack_action1(size_t damage, size_t cost, size_t remaining_life);
+void *log_weapon_drawing(char *weapon_name);
 
 // ACCESSORS
 int **get_map();
@@ -91,6 +93,8 @@ size_t get_warriors_number();
 Warrior *get_current_warrior();
 Warrior *get_warrior_by_id(size_t);
 size_t get_current_round();
+Weapon_ **get_weapons();
+size_t get_weapons_number();
 
 // SEARCH
 Nodes *a_star_algorithm(int **, Warrior *, Node *);
@@ -105,5 +109,6 @@ void run ();
 size_t inRange (Warrior *current, Warrior *enemy);
 size_t obstacleInSight (Warrior *current, Warrior *enemy, int** m);
 
+void set_weapon (Weapon_ *w);
 
 #endif //BALDWARS_GAME_GAME_FUNCTION_H

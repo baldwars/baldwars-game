@@ -18,6 +18,7 @@ size_t move_away_from_with_moves(size_t, size_t);
 size_t get_nearest_enemy();
 
 // ATTACK
+size_t draw_weapon (char* weapon_id);
 size_t canAttack (size_t id);
 size_t attack (size_t id);
 

@@ -1,6 +1,7 @@
 #include <utils.h>
 #include <stdio.h>
 #include "tools.h"
+#include "string.h"
 
 // CELLS
 Cell *get_cell()
@@ -177,12 +178,32 @@ size_t get_nearest_enemy()
     return nearest_enemy;
 }
 
+//Attack
+size_t draw_weapon (char* weapon_id) {
+
+    Weapon_ **weapons = get_weapons();
+    size_t length = get_weapons_number();
+    for (int i = 0; i < length; i++) {
+        if (strcmp(weapon_id, weapons[i]->name) == 0) {
+            set_weapon(weapons[i]);
+        }
+    }
+    Warrior *current_warrior = get_current_warrior();
+    if (current_warrior->weapon == NULL) {
+        printf("\nWeapon doesn't exist \n");
+        return 0;
+    }
+    current_warrior->actions -= 1;
+    log_weapon_drawing(weapon_id);
+    return 1;
+}
+
 size_t canAttack (size_t id) {
     Warrior *current_warrior = get_current_warrior();
     Warrior *enemy = get_warrior_by_id(id);
-    int** map_ = get_map();
+    int** map__ = get_map();
     int range = inRange(current_warrior, enemy);
-    int obs = obstacleInSight(current_warrior, enemy, map_);
+    int obs = obstacleInSight(current_warrior, enemy, map__);
     Weapon_ *w = current_warrior->weapon;
     if (range == 1 && obs == 0 &&  current_warrior->actions >= w->cost) {
         return 1;
@@ -193,20 +214,19 @@ size_t canAttack (size_t id) {
 }
 
 size_t attack (size_t id) {
-    printf("o");
     if (canAttack(id) == 0) {
-        printf("target can't be hit");
+        printf("\ntarget can't be hit\n");
         return  0;
     }
     else {
         Warrior *current_warrior = get_current_warrior();
-        Weapon *weapon = current_warrior->weapon;
+        Weapon_ *weapon = current_warrior->weapon;
         Warrior *enemy = get_warrior_by_id(id);
-        int damage = weapon->damage;
-        enemy->health = enemy->health - (damage);
-        printf("remaining hp %d", enemy->health);
-        printf("\n %c %d %d", weapon->name, damage, weapon->cost);
+        enemy->health = enemy->health - (weapon->damage);
+        printf("\nremaining hp %zu\n", enemy->health);
+        printf("\n %s %zu %zu\n", weapon->name, weapon->damage, weapon->cost);
         //logAttack(actions, weapon->id, damage, weapon.cost);
+        log_attack_action1(weapon->damage, weapon->cost, enemy->health);
         return current_warrior->actions;
     }
 }
