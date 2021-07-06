@@ -1,0 +1,16 @@
+[
+    {
+        "name": "handgun",
+        "damage": 4,
+        "cost": 3,
+        "minRange": 1,
+        "maxRange": 4
+    },
+    {
+        "name": "shotgun",
+        "damage": 10,
+        "cost": 4,
+        "minRange": 1,
+        "maxRange": 3
+    }
+]
