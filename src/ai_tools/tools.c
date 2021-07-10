@@ -168,6 +168,66 @@ void set_weapon(size_t weapon_id)
     warrior->weapon = weapon;
 }
 
+unsigned short can_use_weapon(size_t id)
+{
+    Warrior *current_warrior = get_current_warrior();
+    if (!current_warrior->weapon) {
+        return 0;
+    }
+
+    Warrior *enemy = get_warrior_by_id(id);
+    if (!is_in_weapon_range(current_warrior, enemy->cell)) {
+        return 0;
+    }
+
+    if (cells_are_aligned(current_warrior->cell, enemy->cell) && is_wall_between()) {
+        return 0;
+    }
+    else {
+        Area *area = get_area_limits_between(current_warrior->cell, enemy->cell);
+        Cells *walls = get_wall_in_area(area);
+
+        size_t distance = INT_MAX;
+        Cell *wall = NULL;
+        size_t sum = 0;
+        unsigned short can_shoot = 1;
+
+        for (int i = 0; i < walls->length; ++i) {
+            wall = walls->items[i];
+            if (get_distance_between(current_warrior->cell, wall) < get_distance_between(wall, enemy->cell)) {
+                sum += !((abs((int)wall->x - (int)enemy->cell->x) < 2)
+                    || (abs((int)wall->y - (int)enemy->cell->y) < 2));
+            }
+
+            if (get_distance_between(enemy->cell, wall) < get_distance_between(wall, current_warrior->cell)) {
+                sum += !((abs((int)wall->x - (int)current_warrior->cell->x) < 2)
+                        || (abs((int)wall->y - (int)current_warrior->cell->y) < 2));
+            }
+
+            can_shoot = (sum % 2 == 0) ? 0 : 1;
+        }
+
+        return can_shoot;
+    }
+
+
+    unsigned short current_has_as_wall_neighbor = has_wall_as_neighbor(current_warrior->cell, get_map());
+    unsigned short enemy_has_wall_as_neighbor = has_wall_as_neighbor(enemy->cell, get_map());
+
+    Nodes *current_warrior_walls = get_walls_of(current_warrior->cell, get_map());
+    Nodes *enemy_walls = get_walls_of(enemy->cell, get_map());
+
+    unsigned short wall_is_between = 0;
+    if (enemy_walls->length > 0) {
+        wall_is_between += is_wall_between(enemy_walls, current_warrior->cell, enemy->cell);
+    }
+    if (current_warrior_walls->length > 0) {
+        wall_is_between += is_wall_between(current_warrior_walls, current_warrior->cell, enemy->cell);
+    }
+
+    return 1;
+}
+
 // SEARCH
 size_t get_nearest_enemy()
 {

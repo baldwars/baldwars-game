@@ -206,6 +206,47 @@ void writeJSON (char *string) {
     fclose(jsonFile);
 }
 
+// AREA
+Area *area_init(size_t min_x, size_t max_x, size_t min_y, size_t max_y)
+{
+    Area *area = malloc(sizeof(Area));
+    *area = (Area){
+        .min_x = min_x,
+        .max_x = max_x,
+        .min_y = min_y,
+        .max_y = max_y
+    };
+
+    return area;
+}
+
+Area *get_area_limits_between(Cell *a, Cell *b)
+{
+    size_t min_x = (a->x < b->x) ? a->x : b->x;
+    size_t max_x = (a->x < b->x) ? b->x : a->x;
+
+    size_t min_y = (a->y < b->y) ? a->y : b->y;
+    size_t max_y = (a->y < b->y) ? b->y : a->y;
+
+    return area_init(min_x, max_x, min_y, max_y);
+}
+
+Cells *get_wall_in_area(Area *area)
+{
+    Cell *cell = NULL;
+    Cells *walls = cells_init();
+    for (int i = area->min_x; i < area->max_x; ++i) {
+        for (int j = area->min_y; j < area->max_y; ++j) {
+            cell = cell_init(i, j);
+            if (cell_is_obstacle(cell)) {
+                cells_push_back(walls, cell);
+            }
+        }
+    }
+
+    return walls;
+}
+
 // CELL
 Cell *cell_init(size_t x, size_t y)
 {
@@ -216,6 +257,38 @@ Cell *cell_init(size_t x, size_t y)
     };
 
     return cell;
+}
+
+Cells *cells_init()
+{
+    return cells_init_alloc(1);
+}
+
+Cells *cells_init_alloc(size_t capacity)
+{
+    Cells *cells = malloc(sizeof(Cells));
+    *cells = (Cells){
+            .length = 0,
+            .capacity = capacity,
+            .items = malloc(sizeof(Cell *) * capacity),
+    };
+
+    return cells;
+}
+
+void cells_check_alloc(Cells *cells)
+{
+    if (cells->length >= cells->capacity)
+    {
+        cells-> capacity += (cells->capacity < CAPACITY_LIMIT) ? cells->capacity : CAPACITY_LIMIT;
+        cells->items = realloc(cells->items, (sizeof(Cell *) * cells->capacity));
+    }
+}
+
+void cells_push_back(Cells *cells, Cell *value)
+{
+    cells_check_alloc(cells);
+    cells->items[cells->length++] = value;
 }
 
 Cell *get_opposite_corner_from(Cell *source)
@@ -247,6 +320,34 @@ unsigned short cell_is_entity(Cell *target)
 {
     int value = map_[target->x][target->y];
     return value > 0;
+}
+
+Cell *get_direction_between(Cell *a, Cell *b)
+{
+    if (a->x < b->x && a->y > b->y) {
+        return cell_init(-1, 1);
+    }
+    else if (a->x < b->x && a->y < b->y) {
+        return cell_init(-1, -1);
+    }
+    else if (a->x > b->x && a->y > b->y) {
+        return cell_init(1, 1);
+    }
+    else if (a->x > b->x && a->y < b->y) {
+        return cell_init(1, -1);
+    }
+    else if (a->x < b->x && a->y == b->y) {
+        return cell_init(-1, 0);
+    }
+    else if (a->x == b->x && a->y < b->y) {
+        return cell_init(0, -1);
+    }
+    else if (a->x > b->x && a->y == b->y) {
+        return cell_init(1, 0);
+    }
+    else {
+        return cell_init(0, 1);
+    }
 }
 
 // WEAPON
@@ -314,6 +415,17 @@ Weapon **load_weapons(size_t *weapons_length)
     }
 
     return weapons;
+}
+
+unsigned short is_in_weapon_range(Warrior *warrior, Cell *target)
+{
+    size_t distance = get_distance_between(warrior->cell, target);
+
+    if (distance < warrior->weapon->min_range || distance > warrior->weapon->max_range) {
+        return 0;
+    }
+
+    return 1;
 }
 
 Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t health, size_t moves, size_t action)
@@ -469,7 +581,115 @@ void update_map(int **map, Warrior *warrior, Node *node)
     map[node->x][node->y] = warrior->id;
     warrior->cell = cell_init(node->x, node->y);
     warrior->moves--;
+}
 
+unsigned short has_wall_as_neighbor(Cell *cell, int **map)
+{
+    Node *current = node_init(cell->x, cell->y, cell_is_obstacle(cell), cell_is_entity(cell));
+    Nodes *graph = convert_grid_to_nodes(map, MAP_SIZE, MAP_SIZE);
+    Nodes *neighbors = neighbors_of(current, graph, DIRECTION_WITH_DIAGONALS);
+
+    for (int i = 0; i < WITH_DIAGONALS_NEIGHBORS_LENGTH; ++i) {
+        if (neighbors->items[i]->is_obstacle) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+Nodes *get_walls_of(Cell *cell, int **map)
+{
+    Node *current = node_init(cell->x, cell->y, cell_is_obstacle(cell), cell_is_entity(cell));
+    Nodes *graph = convert_grid_to_nodes(map, MAP_SIZE, MAP_SIZE);
+    Nodes *neighbors = neighbors_of(current, graph, DIRECTION_WITH_DIAGONALS);
+
+    Nodes *walls = nodes_init();
+
+    for (int i = 0; i < WITH_DIAGONALS_NEIGHBORS_LENGTH; ++i) {
+        if (neighbors->items[i]->is_obstacle) {
+            nodes_push_back(walls, neighbors->items[i]);
+        }
+    }
+
+    return walls;
+}
+
+unsigned short is_wall_between(Nodes *walls, Cell *a, Cell *b)
+{
+    Cell *wall = NULL;
+    for (int i = 0; i < walls->length; ++i) {
+        wall = cell_init(walls->items[i]->x, walls->items[i]->y);
+
+        if (is_wall_horizontally_between(wall, a, b)
+            || is_wall_vertically_between(wall, a, b)
+            || is_wall_diagonally_between(wall, a, b))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+unsigned short is_wall_vertically_between(Cell *wall, Cell *a, Cell *b)
+{
+    return ((wall->x < a->x && wall->x > b->x) || (wall->x > a->x && wall->x < b->x))
+        && wall->y == a->y && a->y == b->y;
+}
+
+unsigned short is_wall_horizontally_between(Cell *wall, Cell *a, Cell *b)
+{
+    return ((wall->y < a->y && wall->y > b->y) || (wall->y > a->y && wall->y < b->y))
+           && wall->x == a->x && a->x == b->x;
+}
+
+Cells *get_diagonal_cells_from(Cell *from, Cell *direction)
+{
+    Cells *cells = cells_init();
+    Cell *current = cell_init(from->x, from->y);
+
+    while (current->x > 0 && current->x < MAP_SIZE && current->y > 0 && current->y < MAP_SIZE) {
+        current->x += direction->x;
+        current->y += direction->y;
+
+        cells_push_back(cells, current);
+    }
+
+    return cells;
+}
+
+unsigned short cells_contains(Cells *cells, Cell *cell)
+{
+    if (cells == NULL || cell == NULL) {
+        return 0;
+    }
+
+    Cell *current;
+
+    for (int i = 0; i < cells->length; ++i) {
+        current = cells->items[i];
+
+        if (current->x == cell->x && current->y == cell->y) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+unsigned short is_wall_diagonally_between(Cell *wall, Cell *a, Cell *b)
+{
+    Cell *direction = get_direction_between(a, b);
+    Cells *diagonal = get_diagonal_cells_from(a, direction);
+
+    if (cells_contains(diagonal, b) && cells_contains(diagonal, wall)) {
+        if ((a->x < wall->x && b->x > wall->x) || (a->x > wall->x && b->x < wall->x)) {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 void free_map(int **map)
