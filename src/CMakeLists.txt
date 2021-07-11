@@ -12,11 +12,8 @@ include_directories(utils)
 add_executable(BaldWars_Game
         game/game.c
         game/game.h
-        game/game_struct.h
         json_file_management/cJSON.c
         json_file_management/cJSON.h
-        json_file_management/jsonActionLog.c
-        json_file_management/jsonActionLog.h
         path_finding/path_finding.c
         path_finding/path_finding.h
         ai_tools/tools.c

@@ -179,18 +179,17 @@ size_t get_nearest_enemy()
 }
 
 //Attack
-size_t draw_weapon (char* weapon_id) {
+size_t equip_weapon (size_t weapon_id) {
 
-    Weapon_ **weapons = get_weapons();
+    Weapon **weapons = get_weapons();
     size_t length = get_weapons_number();
     for (int i = 0; i < length; i++) {
-        if (strcmp(weapon_id, weapons[i]->name) == 0) {
+        if (weapon_id == weapons[i]->id) {
             set_weapon(weapons[i]);
         }
     }
     Warrior *current_warrior = get_current_warrior();
     if (current_warrior->weapon == NULL) {
-        printf("\nWeapon doesn't exist \n");
         return 0;
     }
     current_warrior->actions -= 1;
@@ -198,13 +197,13 @@ size_t draw_weapon (char* weapon_id) {
     return 1;
 }
 
-size_t canAttack (size_t id) {
+size_t can_attack (size_t id) {
     Warrior *current_warrior = get_current_warrior();
     Warrior *enemy = get_warrior_by_id(id);
     int** map__ = get_map();
     int range = inRange(current_warrior, enemy);
     int obs = obstacleInSight(current_warrior, enemy, map__);
-    Weapon_ *w = current_warrior->weapon;
+    Weapon *w = current_warrior->weapon;
     if (range == 1 && obs == 0 &&  current_warrior->actions >= w->cost) {
         return 1;
     }
@@ -214,19 +213,15 @@ size_t canAttack (size_t id) {
 }
 
 size_t attack (size_t id) {
-    if (canAttack(id) == 0) {
-        printf("\ntarget can't be hit\n");
+    if (can_attack(id) == 0) {
         return  0;
     }
     else {
         Warrior *current_warrior = get_current_warrior();
-        Weapon_ *weapon = current_warrior->weapon;
+        Weapon *weapon = current_warrior->weapon;
         Warrior *enemy = get_warrior_by_id(id);
         enemy->health = enemy->health - (weapon->damage);
-        printf("\nremaining hp %zu\n", enemy->health);
-        printf("\n %s %zu %zu\n", weapon->name, weapon->damage, weapon->cost);
-        //logAttack(actions, weapon->id, damage, weapon.cost);
-        log_attack_action1(weapon->damage, weapon->cost, enemy->health);
+        log_attack_action1(weapon->id, weapon->cost);
         return current_warrior->actions;
     }
 }

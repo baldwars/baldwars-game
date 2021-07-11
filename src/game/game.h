@@ -5,27 +5,35 @@
 #include <stdlib.h>
 #include <cJSON.h>
 #include <utils.h>
-#include "game_struct.h"
 
 #define MAP_SIZE 20
 #define WALLS_MIN_RATIO 0.2
 #define WALLS_MAX_RATIO 0.4
 
 typedef struct cell_t Cell;
-typedef struct weapon_t Weapon_;
+typedef struct cells_t Cells;
+typedef struct weapon_t Weapon;
 typedef struct warrior_t Warrior;
+typedef struct area_t Area;
 
 struct cell_t {
     size_t x;
     size_t y;
 };
 
+struct cells_t {
+    Cell **items;
+    size_t length;
+    size_t capacity;
+};
+
 struct weapon_t {
-    char *name;
+    size_t id;
+    const char *name;
     size_t damage;
     size_t cost;
-    size_t minRange;
-    size_t maxRange;
+    size_t min_range;
+    size_t max_range;
 };
 
 struct warrior_t {
@@ -35,8 +43,15 @@ struct warrior_t {
     size_t health;
     size_t moves;
     size_t actions;
-    Weapon_ *weapon;
+    Weapon *weapon;
     Cell *cell;
+};
+
+struct area_t {
+    size_t min_x;
+    size_t max_x;
+    size_t min_y;
+    size_t max_y;
 };
 
 // CELL
@@ -44,9 +59,14 @@ Cell *cell_init(size_t, size_t);
 Cell *get_opposite_corner_from(Cell *);
 unsigned short cell_is_obstacle(Cell *);
 unsigned short cell_is_entity(Cell *);
+Cells *cells_init();
+Cells *cells_init_alloc(size_t);
+void cells_check_alloc(Cells *);
+void cells_push_back(Cells *, Cell *);
+unsigned short cells_contains(Cells *, Cell *);
 
 // WEAPON
-Weapon_ *weapon_init(const char *name, size_t damage, size_t cost, size_t minRange, size_t maxRange);
+Weapon *weapon_init(size_t, const char *, size_t , size_t , size_t , size_t );
 
 // WARRIOR
 Warrior *warrior_init(unsigned short, const char *, size_t, size_t, size_t, size_t);
@@ -65,7 +85,7 @@ void free_map(int **);
 void update_map(int **, Warrior *, Node *);
 
 // GAME
-void game_start();
+cJSON *game_start();
 
 // DISPLAY
 void print_map(int **);
@@ -83,8 +103,8 @@ void log_round(size_t);
 void log_warriors(cJSON *);
 void log_warrior(const char *);
 void log_warrior_action(cJSON *);
-void *log_attack_action1(size_t damage, size_t cost, size_t remaining_life);
-void *log_weapon_drawing(char *weapon_name);
+void log_attack_action1(size_t, size_t);
+void log_weapon_drawing(size_t);
 
 // ACCESSORS
 int **get_map();
@@ -93,7 +113,7 @@ size_t get_warriors_number();
 Warrior *get_current_warrior();
 Warrior *get_warrior_by_id(size_t);
 size_t get_current_round();
-Weapon_ **get_weapons();
+Weapon **get_weapons();
 size_t get_weapons_number();
 
 // SEARCH
@@ -105,10 +125,16 @@ void deleteMap (int index);
 void setupMap (int index);
 void loadScript();
 void run ();
+
+// AREA
+Area *area_init(size_t, size_t, size_t, size_t);
+Area *get_area_limits_between(Cell *, Cell *);
+Cells *get_wall_in_area(Area *);
+
 // ATTACK
 size_t inRange (Warrior *current, Warrior *enemy);
 size_t obstacleInSight (Warrior *current, Warrior *enemy, int** m);
 
-void set_weapon (Weapon_ *w);
+void set_weapon (Weapon *w);
 
 #endif //BALDWARS_GAME_GAME_FUNCTION_H
