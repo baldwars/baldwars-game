@@ -1,26 +1,7 @@
 #include "game.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include "../json_file_management/jsonActionLog.h"
-#include "../utils/utils.h"
 #include "../path_finding/path_finding.h"
-#include "../ai_tools/tools.h"
-
-const int smallTABSIZE = 25;
-const int mediumTABSIZE = 50;
-const int largeTABSIZE = 100;
-const int smallOBSTACLE = 125;
-const int mediumOBSTACLE = 500;
-const int largeOBSTACLE = 2000;
-
-const long blockSize = 24;
-long count = 20;
-//char buffer[blockSize];
-int turn = 0;
-int nbPlayers = 2;
-Character **players;
-Character *currentPlayer;
 
 int **map_;
 Warrior *current_warrior_;
@@ -32,179 +13,6 @@ size_t *weapons_number_;
 cJSON *json_rounds_;
 cJSON *json_warriors_;
 cJSON *json_current_warrior_actions_;
-
-void loadScript() {
-    FILE *scriptFile;
-    long read;
-    char *path = "../script0.c";
-    path[9] = (char) turn % nbPlayers;
-    scriptFile = fopen(path, "r");
-    if (scriptFile == NULL) {
-        printf("error");
-        exit(1);
-    }
-    //fread(buffer, blockSize, count, scriptFile);
-    fclose(scriptFile);
-}
-
-void run () {
-    currentPlayer = players[turn % nbPlayers];
-
-    turn++;
-}
-
-
-
-bool inRange (Character *target) {
-    int x, y;
-    Weapon_ w = currentPlayer->weapon;
-    x = abs(currentPlayer->xPosition - target->xPosition);
-    y = abs(currentPlayer->yPosition - target->yPosition);
-    if (x + y >= w.minRange && x + y <= w.maxRange) {
-        printf("in range");
-        return true;
-    } else {
-        printf("not in range");
-        return false;
-    }
-}
-
-bool linearXObstacleCheck (int a, int b) {
-    if (a < b) {
-        for (int j = a; j < b; j++) {
-            if (map_[currentPlayer->xPosition][j] == 1) {
-                return true;
-            }
-        }
-    }
-    else if (a > b) {
-        for (int j = b; j < a; j++) {
-            if (map_[currentPlayer->xPosition][j] == 1) {
-                return true;
-            }
-        }
-    }
-    else {
-        printf("you can't step on the other player");
-        return false;
-    }
-}
-
-bool linearYObstacleCheck (int a, int b) {
-    if (a < b) {
-        for (int i = a; i < b; i++) {
-            if (map_[i][currentPlayer->yPosition] == 1) {
-                return true;
-            }
-        }
-    }
-
-    else {
-        for (int i = b; i < a; i++) {
-            if (map_[i][currentPlayer->yPosition] == 1) {
-                return true;
-            }
-        }
-    }
-}
-
-bool obstacleInSight (Character *target) {
-
-    if (currentPlayer->xPosition == target->xPosition) {
-        linearXObstacleCheck(currentPlayer->yPosition, target->yPosition);
-    }
-
-    else if (currentPlayer->yPosition == target->yPosition) {
-        linearYObstacleCheck(currentPlayer->xPosition, target->xPosition);
-    }
-
-    else {
-        int absX = abs(currentPlayer->xPosition - target->xPosition);
-        int absY = abs(currentPlayer->yPosition - target->yPosition);
-        if (currentPlayer->xPosition < target->xPosition) {
-            if (currentPlayer->yPosition < target->yPosition) {
-                if (absX == absY) {
-                    int j = currentPlayer->yPosition;
-                    for (int i = currentPlayer->xPosition; i < target->xPosition; i++) {
-                        if (map_[i][j] == 1) {
-                            return true;
-                        }
-                        j++;
-                    }
-                    return false;
-                }
-                else {
-                    /*if () {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }*/
-                }
-            }
-
-            else  {
-                for (int j = target->yPosition; j < currentPlayer->yPosition; j++) {
-                    if (map_[currentPlayer->xPosition][j] == 1) {
-                        return true;
-                    }
-                }
-            }
-
-        }
-    }
-}
-
-bool canAttack (Character *target) {
-    bool range = inRange(target);
-    bool obs = obstacleInSight(target);
-    if (range && !obs) {
-        printf("oui");
-        return true;
-    }
-    else {
-        printf("target can't be hit");
-        return false;
-    }
-}
-
-void attack (Character *target) {
-    Weapon_ weapon = currentPlayer->weapon;
-    if (!canAttack(target) || currentPlayer->actionPoint < weapon.cost) {
-        printf("target can't be hit");
-    }
-    else {
-        int damage = weapon.damage - target->armor;
-        target->hp = target->hp - (damage);
-        printf("remaining hp %d", target->hp);
-        logAttack(actions_, damage, *target);
-    }
-}
-
-void defend () {
-    currentPlayer->armor = 5;
-    logDefence(actions_, currentPlayer);
-}
-
-void moveToEnemy (Character target) {
-
-
-}
-
-void moveFromEnemy (Character target) {
-
-}
-
-void writeJSON (char *string) {
-    FILE *jsonFile;
-    jsonFile = fopen("../test.json", "w");
-    if (jsonFile == NULL) {
-        printf("error");
-        exit(1);
-    }
-    fprintf(jsonFile, string);
-    fclose(jsonFile);
-}
 
 // AREA
 Area *area_init(size_t min_x, size_t max_x, size_t min_y, size_t max_y)
@@ -235,8 +43,8 @@ Cells *get_wall_in_area(Area *area)
 {
     Cell *cell = NULL;
     Cells *walls = cells_init();
-    for (int i = area->min_x; i < area->max_x; ++i) {
-        for (int j = area->min_y; j < area->max_y; ++j) {
+    for (size_t i = area->min_x; i <= area->max_x; ++i) {
+        for (size_t j = area->min_y; j <= area->max_y; ++j) {
             cell = cell_init(i, j);
             if (cell_is_obstacle(cell)) {
                 cells_push_back(walls, cell);
@@ -289,6 +97,22 @@ void cells_push_back(Cells *cells, Cell *value)
 {
     cells_check_alloc(cells);
     cells->items[cells->length++] = value;
+}
+
+Cell *get_corner(size_t corner)
+{
+    size_t last_index = MAP_SIZE - 1;
+
+    switch (corner) {
+        case TOP_LEFT:
+            return cell_init(0, 0);
+        case TOP_RIGHT:
+            return cell_init(0, last_index);
+        case DOWN_LEFT:
+            return cell_init(last_index, 0);
+        default:
+            return cell_init(last_index, last_index);
+    }
 }
 
 Cell *get_opposite_corner_from(Cell *source)
@@ -348,6 +172,26 @@ Cell *get_direction_between(Cell *a, Cell *b)
     else {
         return cell_init(0, 1);
     }
+}
+
+size_t get_distance_between(Cell *a, Cell *b)
+{
+    return abs((int) a->x - (int) b->x) + abs((int) a->y - (int) b->y);
+}
+
+void print_cells(Cells *cells)
+{
+    printf("[ ");
+    for (int i = 0; i < cells->length; ++i) {
+        Cell *cell = cells->items[i];
+        if (i == cells->length - 1) {
+            printf("{ %u ; %u }", cell->x, cell->y);
+        }
+        else {
+            printf("{ %u ; %u }, ", cell->x, cell->y);
+        }
+    }
+    printf(" ]\n");
 }
 
 // WEAPON
@@ -522,7 +366,7 @@ void game_start()
     print_map(map_);
 
     size_t current_round = 1;
-    size_t round_limit = 2;
+    size_t round_limit = 5;
     unsigned short fight_is_over = 0;
 
     while (!fight_is_over) {
@@ -534,19 +378,7 @@ void game_start()
             size_t moves = current_warrior_->moves;
             size_t actions = current_warrior_->actions;
 
-            size_t id = get_nearest_enemy(); // to delete when user script ready
-            printf("\nNearest enemy: %u\n", id);
-            Warrior *enemy = (i == 0) ? warriors_[1] : warriors_[0]; // to delete when user script ready
-            size_t distance = get_distance_between(current_warrior_->cell, enemy->cell); // to delete when user script ready
-            // to delete when user script ready
-            if (distance <= 3) {
-                move_away_from(enemy->id);
-            }
-            else {
-                move_toward(enemy->id);
-            }
-            print_map(map_);
-            // end of block to remove
+            // run user script function here
 
             log_warrior(current_warrior_->name);
 
@@ -615,15 +447,44 @@ Nodes *get_walls_of(Cell *cell, int **map)
     return walls;
 }
 
-unsigned short is_wall_between(Nodes *walls, Cell *a, Cell *b)
+unsigned short is_wall_between(Cell *wall, Cell *a, Cell *b)
 {
-    Cell *wall = NULL;
-    for (int i = 0; i < walls->length; ++i) {
-        wall = cell_init(walls->items[i]->x, walls->items[i]->y);
+    if (is_wall_horizontally_between(wall, a, b)
+        ||
+        is_wall_horizontally_between(wall, b, a)
+        ||
+        is_wall_vertically_between(wall, a, b)
+        ||
+        is_wall_vertically_between(wall, b, a)
+        ||
+        is_wall_diagonally_between(wall, a, b)
+        ||
+        are_symmetrical_from(wall, a, b))
+    {
+        return 1;
+    }
 
-        if (is_wall_horizontally_between(wall, a, b)
-            || is_wall_vertically_between(wall, a, b)
-            || is_wall_diagonally_between(wall, a, b))
+    return 0;
+}
+
+unsigned short are_horizontally_aligned(Cell *a, Cell *b)
+{
+    return a->x == b->x;
+}
+
+unsigned short are_vertically_aligned(Cell *a, Cell *b)
+{
+    return a->y == b->y;
+}
+
+unsigned short is_wall_vertically_between(Cell *wall, Cell *a, Cell *b)
+{
+    if (are_vertically_aligned(a, wall)) {
+        if ((are_vertically_aligned(wall, b))
+            ||
+        (abs((int)wall->y - (int)b->y) == 1 && get_distance_between(a, wall) < get_distance_between(wall, b))
+            ||
+        (get_distance_between(a, wall) == 1 && are_diagonally_aligned(wall, b)))
         {
             return 1;
         }
@@ -632,16 +493,20 @@ unsigned short is_wall_between(Nodes *walls, Cell *a, Cell *b)
     return 0;
 }
 
-unsigned short is_wall_vertically_between(Cell *wall, Cell *a, Cell *b)
-{
-    return ((wall->x < a->x && wall->x > b->x) || (wall->x > a->x && wall->x < b->x))
-        && wall->y == a->y && a->y == b->y;
-}
-
 unsigned short is_wall_horizontally_between(Cell *wall, Cell *a, Cell *b)
 {
-    return ((wall->y < a->y && wall->y > b->y) || (wall->y > a->y && wall->y < b->y))
-           && wall->x == a->x && a->x == b->x;
+    if (are_horizontally_aligned(a, wall)) {
+        if ((are_horizontally_aligned(wall, b))
+            ||
+        (abs((int)wall->x - (int)b->x) == 1 && get_distance_between(a, wall) > get_distance_between(wall, b))
+            ||
+        (get_distance_between(a, wall) == 1 && are_diagonally_aligned(wall, b)))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 Cells *get_diagonal_cells_from(Cell *from, Cell *direction)
@@ -676,6 +541,26 @@ unsigned short cells_contains(Cells *cells, Cell *cell)
     }
 
     return 0;
+}
+
+unsigned short are_diagonally_aligned(Cell *a, Cell *b)
+{
+    Cell *direction = get_direction_between(a, b);
+    Cells *diagonal = get_diagonal_cells_from(a, direction);
+
+    if (cells_contains(diagonal, b)) {
+        return 1;
+    }
+
+    return 0;
+}
+
+unsigned short are_symmetrical_from(Cell *wall, Cell *a, Cell *b)
+{
+    return ((abs((int)a->x - (int)wall->x) == abs((int)wall->x - (int)b->x)
+            && !are_vertically_aligned(b, wall))
+        || (abs((int)a->y - (int)wall->y) == abs((int)wall->y - (int)b->y)
+            && !are_horizontally_aligned(b, wall)));
 }
 
 unsigned short is_wall_diagonally_between(Cell *wall, Cell *a, Cell *b)
@@ -733,8 +618,17 @@ int **generate_random_map()
     }
 
     generate_walls_on_map(&map);
+    no_walls_in_corners(&map);
 
     return map;
+}
+
+void no_walls_in_corners(int ***map)
+{
+    (*map)[0][0] = 0;
+    (*map)[0][MAP_SIZE - 1] = 0;
+    (*map)[MAP_SIZE - 1][0] = 0;
+    (*map)[MAP_SIZE - 1][MAP_SIZE - 1] = 0;
 }
 
 void generate_walls_on_map(int ***map)

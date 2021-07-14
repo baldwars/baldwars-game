@@ -5,8 +5,8 @@
 
 // CELLS
 Cell *get_cell();
-Cell *get_cell_of(size_t);
-size_t get_distance_between(Cell *, Cell *);
+Cell *get_cell_of_warrior(size_t);
+size_t get_distance(size_t, size_t);
 
 // MOVEMENTS
 size_t move_toward(size_t);

@@ -9,15 +9,18 @@ Cell *get_cell()
     return warrior->cell;
 }
 
-Cell *get_cell_of(size_t id)
+Cell *get_cell_of_warrior(size_t id)
 {
     Warrior *warrior = get_warrior_by_id(id);
     return warrior->cell;
 }
 
-size_t get_distance_between(Cell *a, Cell *b)
+size_t get_distance(size_t from, size_t to)
 {
-    return abs((int) a->x - (int) b->x) + abs((int) a->y - (int) b->y);
+    Cell *a = get_cell_of_warrior(from);
+    Cell *b = get_cell_of_warrior(to);
+
+    return get_distance_between(a, b);
 }
 
 // MOVEMENTS
@@ -90,9 +93,21 @@ size_t move_away_from(size_t id)
     Warrior *enemy = get_warrior_by_id(id);
     int **map = get_map();
 
-    Cell *corner = get_opposite_corner_from(enemy->cell);
-    Node *target = node_init(corner->x, corner->y, cell_is_obstacle(corner), cell_is_entity(corner));
-    Nodes *path = a_star_algorithm(map, current_warrior, target);
+    Cell *corner;
+    Node *target;
+    Nodes *path;
+    Node *node_enemy;
+
+    for (int i = 0; i < CORNERS_NUMBER; ++i) {
+        corner = get_corner(i);
+        target = node_init(corner->x, corner->y, cell_is_obstacle(corner), cell_is_entity(corner));
+        path = a_star_algorithm(map, current_warrior, target);
+        node_enemy = node_init(enemy->cell->x, enemy->cell->y, 0, 1);
+
+        if (!nodes_includes(path, node_enemy)) {
+            break;
+        }
+    }
 
     cJSON *json_path = NULL;
     size_t moves = current_warrior->moves;
@@ -123,9 +138,21 @@ size_t move_away_from_with_moves(size_t id, size_t moves)
     Warrior *enemy = get_warrior_by_id(id);
     int **map = get_map();
 
-    Cell *corner = get_opposite_corner_from(enemy->cell);
-    Node *target = node_init(corner->x, corner->y, cell_is_obstacle(corner), cell_is_entity(corner));
-    Nodes *path = a_star_algorithm(map, current_warrior, target);
+    Cell *corner;
+    Node *target;
+    Nodes *path;
+    Node *node_enemy;
+
+    for (int i = 0; i < CORNERS_NUMBER; ++i) {
+        corner = get_corner(i);
+        target = node_init(corner->x, corner->y, cell_is_obstacle(corner), cell_is_entity(corner));
+        path = a_star_algorithm(map, current_warrior, target);
+        node_enemy = node_init(enemy->cell->x, enemy->cell->y, 0, 1);
+
+        if (!nodes_includes(path, node_enemy)) {
+            break;
+        }
+    }
 
     cJSON *json_path = NULL;
 
@@ -168,61 +195,34 @@ void set_weapon(size_t weapon_id)
     warrior->weapon = weapon;
 }
 
-unsigned short can_use_weapon(size_t id)
+unsigned short can_use_weapon(size_t target_id)
 {
     Warrior *current_warrior = get_current_warrior();
     if (!current_warrior->weapon) {
         return 0;
     }
 
-    Warrior *enemy = get_warrior_by_id(id);
+    Warrior *enemy = get_warrior_by_id(target_id);
     if (!is_in_weapon_range(current_warrior, enemy->cell)) {
         return 0;
     }
 
-    if (cells_are_aligned(current_warrior->cell, enemy->cell) && is_wall_between()) {
+    if (current_warrior->actions < current_warrior->weapon->cost) {
         return 0;
     }
-    else {
-        Area *area = get_area_limits_between(current_warrior->cell, enemy->cell);
-        Cells *walls = get_wall_in_area(area);
 
-        size_t distance = INT_MAX;
-        Cell *wall = NULL;
-        size_t sum = 0;
-        unsigned short can_shoot = 1;
+    Area *area = get_area_limits_between(current_warrior->cell, enemy->cell);
+    Cells *walls = get_wall_in_area(area);
 
-        for (int i = 0; i < walls->length; ++i) {
-            wall = walls->items[i];
-            if (get_distance_between(current_warrior->cell, wall) < get_distance_between(wall, enemy->cell)) {
-                sum += !((abs((int)wall->x - (int)enemy->cell->x) < 2)
-                    || (abs((int)wall->y - (int)enemy->cell->y) < 2));
-            }
+    print_cells(walls);
 
-            if (get_distance_between(enemy->cell, wall) < get_distance_between(wall, current_warrior->cell)) {
-                sum += !((abs((int)wall->x - (int)current_warrior->cell->x) < 2)
-                        || (abs((int)wall->y - (int)current_warrior->cell->y) < 2));
-            }
+    for (size_t i = 0; i < walls->length; ++i)
+    {
+        Cell *wall = walls->items[i];
 
-            can_shoot = (sum % 2 == 0) ? 0 : 1;
+        if (is_wall_between(wall, current_warrior->cell, enemy->cell)) {
+            return 0;
         }
-
-        return can_shoot;
-    }
-
-
-    unsigned short current_has_as_wall_neighbor = has_wall_as_neighbor(current_warrior->cell, get_map());
-    unsigned short enemy_has_wall_as_neighbor = has_wall_as_neighbor(enemy->cell, get_map());
-
-    Nodes *current_warrior_walls = get_walls_of(current_warrior->cell, get_map());
-    Nodes *enemy_walls = get_walls_of(enemy->cell, get_map());
-
-    unsigned short wall_is_between = 0;
-    if (enemy_walls->length > 0) {
-        wall_is_between += is_wall_between(enemy_walls, current_warrior->cell, enemy->cell);
-    }
-    if (current_warrior_walls->length > 0) {
-        wall_is_between += is_wall_between(current_warrior_walls, current_warrior->cell, enemy->cell);
     }
 
     return 1;
