@@ -239,7 +239,7 @@ Weapon *load_weapon(cJSON *weapon)
     size_t id_val = (size_t)cJSON_GetNumberValue(id);
     char *name_val = cJSON_GetStringValue(name);
     size_t damage_val = (size_t)cJSON_GetNumberValue(damage);
-    size_t level_val = (size_t)cJSON_GetNumberValue(damage);
+    size_t level_val = (size_t)cJSON_GetNumberValue(level);
     size_t cost_val = (size_t)cJSON_GetNumberValue(cost);
     size_t min_range_val = (size_t)cJSON_GetNumberValue(min_range);
     size_t max_range_val = (size_t)cJSON_GetNumberValue(max_range);
@@ -359,7 +359,7 @@ unsigned short map_is_valid(int **map)
     return reconstruct_path(came_from, nodes->items[0], nodes->items[1]) ? 1 : 0;
 }
 
-void game_start()
+cJSON *game_start()
 {
     warriors_number_ = malloc(sizeof(size_t));
     warriors_ = load_warriors(warriors_number_);
@@ -367,7 +367,6 @@ void game_start()
     weapons_ = load_weapons(weapons_number_);
 
     map_ = generate_map(warriors_, *warriors_number_);
-    print_map(map_);
 
     size_t current_round = 1;
     size_t round_limit = 5;
@@ -396,9 +395,7 @@ void game_start()
         }
     }
 
-    cJSON *json_fight = log_fight();
-    char *json = cJSON_Print(json_fight);
-    printf("json: %s\n", json);
+    return log_fight();
 }
 
 int **map_init()
@@ -695,6 +692,11 @@ void print_warrior(Warrior *warrior)
     printf("  health: %u\n", warrior->health);
     printf("  moves: %u\n", warrior->moves);
     printf("  actions: %u\n", warrior->actions);
+    printf("  weapon:\n");
+    printf("    id: %u\n", warrior->weapon->id);
+    printf("    level: %u\n", warrior->weapon->level);
+    printf("    cost: %u\n", warrior->weapon->cost);
+    printf("    damage: %u\n", warrior->weapon->damage);
 }
 
 void print_warriors(Warrior **warriors, size_t length)
@@ -731,13 +733,27 @@ void log_movements_action(cJSON *json_path)
     log_warrior_action(json_action);
 }
 
-cJSON *log_attack_action(size_t weapon_id)
+void log_attack_action(size_t weapon_id, size_t cost)
 {
     cJSON *json_action = cJSON_CreateObject();
     cJSON_AddStringToObject(json_action, "type", "attack");
+    cJSON *json_attack_result = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json_attack_result, "id", weapon_id);
+    cJSON *weapon_cost = cJSON_CreateNumber(cost);
+    cJSON_AddItemToObject(json_attack_result, "cost", weapon_cost);
+
+    cJSON_AddItemToObject(json_action, "weapon", json_attack_result);
+
+    log_warrior_action(json_action);
+}
+
+void log_equip_weapon_action(size_t weapon_id)
+{
+    cJSON *json_action = cJSON_CreateObject();
+    cJSON_AddStringToObject(json_action, "type", "equip");
     cJSON_AddNumberToObject(json_action, "weapon", weapon_id);
 
-    return json_action;
+    log_warrior_action(json_action);
 }
 
 void log_warrior_action(cJSON *warrior_action)

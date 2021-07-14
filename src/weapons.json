@@ -2,6 +2,7 @@
   {
     "id": 1,
     "name": "Pistol",
+    "level": 1,
     "damage": 12,
     "cost": 3,
     "min_range": 1,
@@ -11,6 +12,7 @@
     "id": 2,
     "name": "Shotgun",
     "damage": 31,
+    "level": 13,
     "cost": 5,
     "min_range": 1,
     "max_range": 3
@@ -19,6 +21,7 @@
     "id": 3,
     "name": "Katana",
     "damage": 73,
+    "level": 43,
     "cost": 5,
     "min_range": 1,
     "max_range": 1
@@ -27,6 +30,7 @@
     "id": 4,
     "name": "Blaster",
     "damage": 80,
+    "level": 72,
     "cost": 6,
     "min_range": 2,
     "max_range": 7

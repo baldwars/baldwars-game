@@ -84,7 +84,6 @@ unsigned short are_vertically_aligned(Cell *, Cell *);
 unsigned short are_diagonally_aligned(Cell *, Cell *);
 unsigned short are_symmetrical_from(Cell *, Cell *, Cell *);
 size_t get_distance_between(Cell *, Cell *);
-void print_cells(Cells *);
 
 // WEAPON
 Weapon *weapon_init(size_t, const char *, size_t, size_t, size_t, size_t, size_t);
@@ -119,24 +118,25 @@ unsigned short is_wall_horizontally_between(Cell *,Cell *, Cell *);
 unsigned short is_wall_diagonally_between(Cell *,Cell *, Cell *);
 
 // GAME
-void game_start();
+cJSON *game_start();
 
 // DISPLAY
 void print_map(int **);
 void print_warrior(Warrior *);
 void print_warriors(Warrior **, size_t);
+void print_cells(Cells *);
 
 // JSON
 void log_movement(Cell *, cJSON **);
 void log_movements_action(cJSON *);
-cJSON *log_attack(size_t);
-cJSON *log_attacks_action(cJSON *);
-cJSON *log_fight();
+void log_attack_action(size_t, size_t);
+void log_equip_weapon_action(size_t);
 void log_rounds(cJSON *);
 void log_round(size_t);
 void log_warriors(cJSON *);
 void log_warrior(const char *);
 void log_warrior_action(cJSON *);
+cJSON *log_fight();
 
 // ACCESSORS
 int **get_map();

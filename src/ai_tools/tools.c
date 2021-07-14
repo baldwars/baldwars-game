@@ -192,11 +192,14 @@ void set_weapon(size_t weapon_id)
     Warrior *warrior = get_current_warrior();
     Weapon *weapon = get_weapon_by_id(weapon_id);
 
-    if (weapon->level <= warrior->level)
-    {
-        warrior->weapon = weapon;
-        warrior->actions -= 1;
+    if (weapon->level > warrior->level){
+        return;
     }
+
+    warrior->weapon = weapon;
+    warrior->actions -= 1;
+
+    log_equip_weapon_action(weapon_id);
 }
 
 unsigned short can_use_weapon(size_t target_id)
@@ -218,8 +221,6 @@ unsigned short can_use_weapon(size_t target_id)
     Area *area = get_area_limits_between(current_warrior->cell, enemy->cell);
     Cells *walls = get_wall_in_area(area);
 
-    print_cells(walls);
-
     for (size_t i = 0; i < walls->length; ++i)
     {
         Cell *wall = walls->items[i];
@@ -230,6 +231,25 @@ unsigned short can_use_weapon(size_t target_id)
     }
 
     return 1;
+}
+
+void use_weapon(size_t target)
+{
+    if (!can_use_weapon(target)){
+        return;
+    }
+
+    Warrior *warrior = get_current_warrior();
+    Warrior *enemy = get_warrior_by_id(target);
+
+    warrior->actions -= warrior->weapon->cost;
+    enemy->health -= warrior->weapon->damage;
+
+    if (enemy->health < 0) {
+        enemy->health = 0;
+    }
+
+    log_attack_action(warrior->weapon->id, warrior->weapon->cost);
 }
 
 // SEARCH
