@@ -192,7 +192,11 @@ void set_weapon(size_t weapon_id)
     Warrior *warrior = get_current_warrior();
     Weapon *weapon = get_weapon_by_id(weapon_id);
 
-    warrior->weapon = weapon;
+    if (weapon->level <= warrior->level)
+    {
+        warrior->weapon = weapon;
+        warrior->actions -= 1;
+    }
 }
 
 unsigned short can_use_weapon(size_t target_id)

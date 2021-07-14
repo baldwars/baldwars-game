@@ -195,13 +195,15 @@ void print_cells(Cells *cells)
 }
 
 // WEAPON
-Weapon *weapon_init(size_t id, const char *name, size_t damage, size_t cost, size_t min_range, size_t max_range)
+Weapon *weapon_init(size_t id, const char *name, size_t damage, size_t level,
+                    size_t cost, size_t min_range, size_t max_range)
 {
     Weapon *weapon = malloc(sizeof(Weapon));
     *weapon = (Weapon){
         .id = id,
         .name = name,
         .damage = damage,
+        .level = level,
         .cost = cost,
         .min_range = min_range,
         .max_range = max_range
@@ -224,11 +226,12 @@ Weapon *get_weapon_by_id(size_t weapon_id)
 
 Weapon *load_weapon(cJSON *weapon)
 {
-    cJSON *id, *name, *damage, *cost, *min_range, *max_range;
+    cJSON *id, *name, *damage, *level, *cost, *min_range, *max_range;
 
     id = cJSON_GetObjectItemCaseSensitive(weapon, "id");
     name = cJSON_GetObjectItemCaseSensitive(weapon, "name");
     damage = cJSON_GetObjectItemCaseSensitive(weapon, "damage");
+    level = cJSON_GetObjectItemCaseSensitive(weapon, "level");
     cost = cJSON_GetObjectItemCaseSensitive(weapon, "cost");
     min_range = cJSON_GetObjectItemCaseSensitive(weapon, "min_range");
     max_range = cJSON_GetObjectItemCaseSensitive(weapon, "max_range");
@@ -236,11 +239,12 @@ Weapon *load_weapon(cJSON *weapon)
     size_t id_val = (size_t)cJSON_GetNumberValue(id);
     char *name_val = cJSON_GetStringValue(name);
     size_t damage_val = (size_t)cJSON_GetNumberValue(damage);
+    size_t level_val = (size_t)cJSON_GetNumberValue(damage);
     size_t cost_val = (size_t)cJSON_GetNumberValue(cost);
     size_t min_range_val = (size_t)cJSON_GetNumberValue(min_range);
     size_t max_range_val = (size_t)cJSON_GetNumberValue(max_range);
 
-    return weapon_init(id_val, name_val, damage_val, cost_val, min_range_val, max_range_val);
+    return weapon_init(id_val, name_val, damage_val, level_val, cost_val, min_range_val, max_range_val);
 }
 
 Weapon **load_weapons(size_t *weapons_length)

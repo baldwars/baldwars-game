@@ -37,6 +37,7 @@ struct weapon_t {
     size_t id;
     const char *name;
     size_t damage;
+    size_t level;
     size_t cost;
     size_t min_range;
     size_t max_range;
@@ -86,7 +87,7 @@ size_t get_distance_between(Cell *, Cell *);
 void print_cells(Cells *);
 
 // WEAPON
-Weapon *weapon_init(size_t, const char *, size_t, size_t, size_t, size_t);
+Weapon *weapon_init(size_t, const char *, size_t, size_t, size_t, size_t, size_t);
 Weapon *get_weapon_by_id(size_t);
 Weapon *load_weapon(cJSON *);
 Weapon **load_weapons(size_t *);
