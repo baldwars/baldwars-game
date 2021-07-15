@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <cJSON.h>
 #include <utils.h>
-#include "game_struct.h"
 
 #define MAP_SIZE 20
 #define WALLS_MIN_RATIO 0.2
@@ -148,14 +147,6 @@ size_t get_current_round();
 
 // SEARCH
 Nodes *a_star_algorithm(int **, Warrior *, Node *);
-
-
-void initMap (int index);
-void deleteMap (int index);
-void setupMap (int index);
-void loadScript();
-void run ();
-bool inRange (Character *target);
 
 
 #endif //BALDWARS_GAME_GAME_FUNCTION_H

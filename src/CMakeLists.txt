@@ -11,7 +11,6 @@ include_directories(utils)
 add_executable(BaldWars_Game
         game/game.c
         game/game.h
-        game/game_struct.h
         lib/cJSON.c
         lib/cJSON.h
         path_finding/path_finding.c
@@ -20,4 +19,4 @@ add_executable(BaldWars_Game
         ai_tools/tools.h
         utils/utils.c
         utils/utils.h
-        main.c)
+        main.c scripts/user1.c scripts/scripts.h scripts/user2.c)
