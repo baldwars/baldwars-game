@@ -9,15 +9,18 @@ Cell *get_cell()
     return warrior->cell;
 }
 
-Cell *get_cell_of(size_t id)
+Cell *get_cell_of_warrior(size_t id)
 {
     Warrior *warrior = get_warrior_by_id(id);
     return warrior->cell;
 }
 
-size_t get_distance_between(Cell *a, Cell *b)
+size_t get_distance(size_t from, size_t to)
 {
-    return abs((int) a->x - (int) b->x) + abs((int) a->y - (int) b->y);
+    Cell *a = get_cell_of_warrior(from);
+    Cell *b = get_cell_of_warrior(to);
+
+    return get_distance_between(a, b);
 }
 
 // MOVEMENTS
@@ -90,9 +93,21 @@ size_t move_away_from(size_t id)
     Warrior *enemy = get_warrior_by_id(id);
     int **map = get_map();
 
-    Cell *corner = get_opposite_corner_from(enemy->cell);
-    Node *target = node_init(corner->x, corner->y, cell_is_obstacle(corner), cell_is_entity(corner));
-    Nodes *path = a_star_algorithm(map, current_warrior, target);
+    Cell *corner;
+    Node *target;
+    Nodes *path;
+    Node *node_enemy;
+
+    for (int i = 0; i < CORNERS_NUMBER; ++i) {
+        corner = get_corner(i);
+        target = node_init(corner->x, corner->y, cell_is_obstacle(corner), cell_is_entity(corner));
+        path = a_star_algorithm(map, current_warrior, target);
+        node_enemy = node_init(enemy->cell->x, enemy->cell->y, 0, 1);
+
+        if (!nodes_includes(path, node_enemy)) {
+            break;
+        }
+    }
 
     cJSON *json_path = NULL;
     size_t moves = current_warrior->moves;
@@ -123,9 +138,21 @@ size_t move_away_from_with_moves(size_t id, size_t moves)
     Warrior *enemy = get_warrior_by_id(id);
     int **map = get_map();
 
-    Cell *corner = get_opposite_corner_from(enemy->cell);
-    Node *target = node_init(corner->x, corner->y, cell_is_obstacle(corner), cell_is_entity(corner));
-    Nodes *path = a_star_algorithm(map, current_warrior, target);
+    Cell *corner;
+    Node *target;
+    Nodes *path;
+    Node *node_enemy;
+
+    for (int i = 0; i < CORNERS_NUMBER; ++i) {
+        corner = get_corner(i);
+        target = node_init(corner->x, corner->y, cell_is_obstacle(corner), cell_is_entity(corner));
+        path = a_star_algorithm(map, current_warrior, target);
+        node_enemy = node_init(enemy->cell->x, enemy->cell->y, 0, 1);
+
+        if (!nodes_includes(path, node_enemy)) {
+            break;
+        }
+    }
 
     cJSON *json_path = NULL;
 
@@ -151,6 +178,78 @@ size_t move_away_from_with_moves(size_t id, size_t moves)
     }
 
     return current_warrior->moves;
+}
+
+// WEAPON
+size_t get_weapon()
+{
+    Warrior *warrior = get_current_warrior();
+    return (warrior->weapon) ? warrior->weapon->id : 0;
+}
+
+void set_weapon(size_t weapon_id)
+{
+    Warrior *warrior = get_current_warrior();
+    Weapon *weapon = get_weapon_by_id(weapon_id);
+
+    if (weapon->level > warrior->level){
+        return;
+    }
+
+    warrior->weapon = weapon;
+    warrior->actions -= 1;
+
+    log_equip_weapon_action(weapon_id);
+}
+
+unsigned short can_use_weapon(size_t target_id)
+{
+    Warrior *current_warrior = get_current_warrior();
+    if (!current_warrior->weapon) {
+        return 0;
+    }
+
+    Warrior *enemy = get_warrior_by_id(target_id);
+    if (!is_in_weapon_range(current_warrior, enemy->cell)) {
+        return 0;
+    }
+
+    if (current_warrior->actions < current_warrior->weapon->cost) {
+        return 0;
+    }
+
+    Area *area = get_area_limits_between(current_warrior->cell, enemy->cell);
+    Cells *walls = get_wall_in_area(area);
+
+    for (size_t i = 0; i < walls->length; ++i)
+    {
+        Cell *wall = walls->items[i];
+
+        if (is_wall_between(wall, current_warrior->cell, enemy->cell)) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+void use_weapon(size_t target)
+{
+    if (!can_use_weapon(target)){
+        return;
+    }
+
+    Warrior *warrior = get_current_warrior();
+    Warrior *enemy = get_warrior_by_id(target);
+
+    warrior->actions -= warrior->weapon->cost;
+    enemy->health -= warrior->weapon->damage;
+
+    if (enemy->health < 0) {
+        enemy->health = 0;
+    }
+
+    log_attack_action(warrior->weapon->id, warrior->weapon->cost);
 }
 
 // SEARCH

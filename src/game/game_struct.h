@@ -1,8 +1,8 @@
 #ifndef BALDWARS_GAME_GAME_STRUCT_H
 #define BALDWARS_GAME_GAME_STRUCT_H
 
-typedef struct Weapon Weapon;
-struct Weapon {
+typedef struct Weapon_ Weapon_;
+struct Weapon_ {
     char *name;
     int damage;
     int cost;
@@ -16,7 +16,7 @@ struct Character {
     int level;
     int hp;
     int armor;
-    Weapon weapon;
+    Weapon_ weapon;
     int movementPoint;
     int actionPoint;
     int xPosition;

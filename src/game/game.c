@@ -1,207 +1,58 @@
 #include "game.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include "../json_file_management/jsonActionLog.h"
-#include "../utils/utils.h"
 #include "../path_finding/path_finding.h"
-#include "../ai_tools/tools.h"
-
-const int smallTABSIZE = 25;
-const int mediumTABSIZE = 50;
-const int largeTABSIZE = 100;
-const int smallOBSTACLE = 125;
-const int mediumOBSTACLE = 500;
-const int largeOBSTACLE = 2000;
-
-const long blockSize = 24;
-long count = 20;
-//char buffer[blockSize];
-int turn = 0;
-int nbPlayers = 2;
-Character **players;
-Character *currentPlayer;
 
 int **map_;
 Warrior *current_warrior_;
 Warrior **warriors_;
 size_t *warriors_number_;
+Weapon **weapons_;
+size_t *weapons_number_;
 
 cJSON *json_rounds_;
 cJSON *json_warriors_;
 cJSON *json_current_warrior_actions_;
 
-void loadScript() {
-    FILE *scriptFile;
-    long read;
-    char *path = "../script0.c";
-    path[9] = (char) turn % nbPlayers;
-    scriptFile = fopen(path, "r");
-    if (scriptFile == NULL) {
-        printf("error");
-        exit(1);
-    }
-    //fread(buffer, blockSize, count, scriptFile);
-    fclose(scriptFile);
+// AREA
+Area *area_init(size_t min_x, size_t max_x, size_t min_y, size_t max_y)
+{
+    Area *area = malloc(sizeof(Area));
+    *area = (Area){
+        .min_x = min_x,
+        .max_x = max_x,
+        .min_y = min_y,
+        .max_y = max_y
+    };
+
+    return area;
 }
 
-void run () {
-    currentPlayer = players[turn % nbPlayers];
+Area *get_area_limits_between(Cell *a, Cell *b)
+{
+    size_t min_x = (a->x < b->x) ? a->x : b->x;
+    size_t max_x = (a->x < b->x) ? b->x : a->x;
 
-    turn++;
+    size_t min_y = (a->y < b->y) ? a->y : b->y;
+    size_t max_y = (a->y < b->y) ? b->y : a->y;
+
+    return area_init(min_x, max_x, min_y, max_y);
 }
 
-
-
-bool inRange (Character *target) {
-    int x, y;
-    Weapon w = currentPlayer->weapon;
-    x = abs(currentPlayer->xPosition - target->xPosition);
-    y = abs(currentPlayer->yPosition - target->yPosition);
-    if (x + y >= w.minRange && x + y <= w.maxRange) {
-        printf("in range");
-        return true;
-    } else {
-        printf("not in range");
-        return false;
-    }
-}
-
-bool linearXObstacleCheck (int a, int b) {
-    if (a < b) {
-        for (int j = a; j < b; j++) {
-            if (map_[currentPlayer->xPosition][j] == 1) {
-                return true;
-            }
-        }
-    }
-    else if (a > b) {
-        for (int j = b; j < a; j++) {
-            if (map_[currentPlayer->xPosition][j] == 1) {
-                return true;
-            }
-        }
-    }
-    else {
-        printf("you can't step on the other player");
-        return false;
-    }
-}
-
-bool linearYObstacleCheck (int a, int b) {
-    if (a < b) {
-        for (int i = a; i < b; i++) {
-            if (map_[i][currentPlayer->yPosition] == 1) {
-                return true;
+Cells *get_wall_in_area(Area *area)
+{
+    Cell *cell = NULL;
+    Cells *walls = cells_init();
+    for (size_t i = area->min_x; i <= area->max_x; ++i) {
+        for (size_t j = area->min_y; j <= area->max_y; ++j) {
+            cell = cell_init(i, j);
+            if (cell_is_obstacle(cell)) {
+                cells_push_back(walls, cell);
             }
         }
     }
 
-    else {
-        for (int i = b; i < a; i++) {
-            if (map_[i][currentPlayer->yPosition] == 1) {
-                return true;
-            }
-        }
-    }
-}
-
-bool obstacleInSight (Character *target) {
-
-    if (currentPlayer->xPosition == target->xPosition) {
-        linearXObstacleCheck(currentPlayer->yPosition, target->yPosition);
-    }
-
-    else if (currentPlayer->yPosition == target->yPosition) {
-        linearYObstacleCheck(currentPlayer->xPosition, target->xPosition);
-    }
-
-    else {
-        int absX = abs(currentPlayer->xPosition - target->xPosition);
-        int absY = abs(currentPlayer->yPosition - target->yPosition);
-        if (currentPlayer->xPosition < target->xPosition) {
-            if (currentPlayer->yPosition < target->yPosition) {
-                if (absX == absY) {
-                    int j = currentPlayer->yPosition;
-                    for (int i = currentPlayer->xPosition; i < target->xPosition; i++) {
-                        if (map_[i][j] == 1) {
-                            return true;
-                        }
-                        j++;
-                    }
-                    return false;
-                }
-                else {
-                    /*if () {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }*/
-                }
-            }
-
-            else  {
-                for (int j = target->yPosition; j < currentPlayer->yPosition; j++) {
-                    if (map_[currentPlayer->xPosition][j] == 1) {
-                        return true;
-                    }
-                }
-            }
-
-        }
-    }
-}
-
-bool canAttack (Character *target) {
-    bool range = inRange(target);
-    bool obs = obstacleInSight(target);
-    if (range && !obs) {
-        printf("oui");
-        return true;
-    }
-    else {
-        printf("target can't be hit");
-        return false;
-    }
-}
-
-void attack (Character *target) {
-    Weapon weapon = currentPlayer->weapon;
-    if (!canAttack(target) || currentPlayer->actionPoint < weapon.cost) {
-        printf("target can't be hit");
-    }
-    else {
-        int damage = weapon.damage - target->armor;
-        target->hp = target->hp - (damage);
-        printf("remaining hp %d", target->hp);
-        logAttack(actions_, damage, *target);
-    }
-}
-
-void defend () {
-    currentPlayer->armor = 5;
-    logDefence(actions_, currentPlayer);
-}
-
-void moveToEnemy (Character target) {
-
-
-}
-
-void moveFromEnemy (Character target) {
-
-}
-
-void writeJSON (char *string) {
-    FILE *jsonFile;
-    jsonFile = fopen("../test.json", "w");
-    if (jsonFile == NULL) {
-        printf("error");
-        exit(1);
-    }
-    fprintf(jsonFile, string);
-    fclose(jsonFile);
+    return walls;
 }
 
 // CELL
@@ -214,6 +65,54 @@ Cell *cell_init(size_t x, size_t y)
     };
 
     return cell;
+}
+
+Cells *cells_init()
+{
+    return cells_init_alloc(1);
+}
+
+Cells *cells_init_alloc(size_t capacity)
+{
+    Cells *cells = malloc(sizeof(Cells));
+    *cells = (Cells){
+            .length = 0,
+            .capacity = capacity,
+            .items = malloc(sizeof(Cell *) * capacity),
+    };
+
+    return cells;
+}
+
+void cells_check_alloc(Cells *cells)
+{
+    if (cells->length >= cells->capacity)
+    {
+        cells-> capacity += (cells->capacity < CAPACITY_LIMIT) ? cells->capacity : CAPACITY_LIMIT;
+        cells->items = realloc(cells->items, (sizeof(Cell *) * cells->capacity));
+    }
+}
+
+void cells_push_back(Cells *cells, Cell *value)
+{
+    cells_check_alloc(cells);
+    cells->items[cells->length++] = value;
+}
+
+Cell *get_corner(size_t corner)
+{
+    size_t last_index = MAP_SIZE - 1;
+
+    switch (corner) {
+        case TOP_LEFT:
+            return cell_init(0, 0);
+        case TOP_RIGHT:
+            return cell_init(0, last_index);
+        case DOWN_LEFT:
+            return cell_init(last_index, 0);
+        default:
+            return cell_init(last_index, last_index);
+    }
 }
 
 Cell *get_opposite_corner_from(Cell *source)
@@ -245,6 +144,136 @@ unsigned short cell_is_entity(Cell *target)
 {
     int value = map_[target->x][target->y];
     return value > 0;
+}
+
+Cell *get_direction_between(Cell *a, Cell *b)
+{
+    if (a->x < b->x && a->y > b->y) {
+        return cell_init(-1, 1);
+    }
+    else if (a->x < b->x && a->y < b->y) {
+        return cell_init(-1, -1);
+    }
+    else if (a->x > b->x && a->y > b->y) {
+        return cell_init(1, 1);
+    }
+    else if (a->x > b->x && a->y < b->y) {
+        return cell_init(1, -1);
+    }
+    else if (a->x < b->x && a->y == b->y) {
+        return cell_init(-1, 0);
+    }
+    else if (a->x == b->x && a->y < b->y) {
+        return cell_init(0, -1);
+    }
+    else if (a->x > b->x && a->y == b->y) {
+        return cell_init(1, 0);
+    }
+    else {
+        return cell_init(0, 1);
+    }
+}
+
+size_t get_distance_between(Cell *a, Cell *b)
+{
+    return abs((int) a->x - (int) b->x) + abs((int) a->y - (int) b->y);
+}
+
+void print_cells(Cells *cells)
+{
+    printf("[ ");
+    for (int i = 0; i < cells->length; ++i) {
+        Cell *cell = cells->items[i];
+        if (i == cells->length - 1) {
+            printf("{ %u ; %u }", cell->x, cell->y);
+        }
+        else {
+            printf("{ %u ; %u }, ", cell->x, cell->y);
+        }
+    }
+    printf(" ]\n");
+}
+
+// WEAPON
+Weapon *weapon_init(size_t id, const char *name, size_t damage, size_t level,
+                    size_t cost, size_t min_range, size_t max_range)
+{
+    Weapon *weapon = malloc(sizeof(Weapon));
+    *weapon = (Weapon){
+        .id = id,
+        .name = name,
+        .damage = damage,
+        .level = level,
+        .cost = cost,
+        .min_range = min_range,
+        .max_range = max_range
+    };
+
+    return weapon;
+}
+
+Weapon *get_weapon_by_id(size_t weapon_id)
+{
+    for (int i = 0; i < *weapons_number_; ++i) {
+        Weapon *weapon = weapons_[i];
+        if (weapon->id == weapon_id) {
+            return weapons_[i];
+        }
+    }
+
+    return NULL;
+}
+
+Weapon *load_weapon(cJSON *weapon)
+{
+    cJSON *id, *name, *damage, *level, *cost, *min_range, *max_range;
+
+    id = cJSON_GetObjectItemCaseSensitive(weapon, "id");
+    name = cJSON_GetObjectItemCaseSensitive(weapon, "name");
+    damage = cJSON_GetObjectItemCaseSensitive(weapon, "damage");
+    level = cJSON_GetObjectItemCaseSensitive(weapon, "level");
+    cost = cJSON_GetObjectItemCaseSensitive(weapon, "cost");
+    min_range = cJSON_GetObjectItemCaseSensitive(weapon, "min_range");
+    max_range = cJSON_GetObjectItemCaseSensitive(weapon, "max_range");
+
+    size_t id_val = (size_t)cJSON_GetNumberValue(id);
+    char *name_val = cJSON_GetStringValue(name);
+    size_t damage_val = (size_t)cJSON_GetNumberValue(damage);
+    size_t level_val = (size_t)cJSON_GetNumberValue(level);
+    size_t cost_val = (size_t)cJSON_GetNumberValue(cost);
+    size_t min_range_val = (size_t)cJSON_GetNumberValue(min_range);
+    size_t max_range_val = (size_t)cJSON_GetNumberValue(max_range);
+
+    return weapon_init(id_val, name_val, damage_val, level_val, cost_val, min_range_val, max_range_val);
+}
+
+Weapon **load_weapons(size_t *weapons_length)
+{
+    char *buffer = get_file_content("./weapons.json");
+
+    cJSON *item;
+    cJSON *parsed = cJSON_Parse(buffer);
+    *weapons_length = cJSON_GetArraySize(parsed);
+    Weapon **weapons = malloc(sizeof(Warrior *) * (*weapons_length));
+
+    for (int i = 0; i < *weapons_length; ++i)
+    {
+        item = cJSON_GetArrayItem(parsed, i);
+        weapons[i] = load_weapon(item);
+    }
+
+    return weapons;
+}
+
+unsigned short is_in_weapon_range(Warrior *warrior, Cell *target)
+{
+    size_t distance = get_distance_between(warrior->cell, target);
+
+    if (distance < warrior->weapon->min_range || distance > warrior->weapon->max_range) {
+        return 0;
+    }
+
+    return 1;
 }
 
 Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t health, size_t moves, size_t action)
@@ -330,16 +359,17 @@ unsigned short map_is_valid(int **map)
     return reconstruct_path(came_from, nodes->items[0], nodes->items[1]) ? 1 : 0;
 }
 
-void game_start()
+cJSON *game_start()
 {
     warriors_number_ = malloc(sizeof(size_t));
     warriors_ = load_warriors(warriors_number_);
+    weapons_number_ = malloc(sizeof(size_t));
+    weapons_ = load_weapons(weapons_number_);
 
     map_ = generate_map(warriors_, *warriors_number_);
-    print_map(map_);
 
     size_t current_round = 1;
-    size_t round_limit = 2;
+    size_t round_limit = 5;
     unsigned short fight_is_over = 0;
 
     while (!fight_is_over) {
@@ -351,19 +381,7 @@ void game_start()
             size_t moves = current_warrior_->moves;
             size_t actions = current_warrior_->actions;
 
-            size_t id = get_nearest_enemy(); // to delete when user script ready
-            printf("\nNearest enemy: %u\n", id);
-            Warrior *enemy = (i == 0) ? warriors_[1] : warriors_[0]; // to delete when user script ready
-            size_t distance = get_distance_between(current_warrior_->cell, enemy->cell); // to delete when user script ready
-            // to delete when user script ready
-            if (distance <= 3) {
-                move_away_from(enemy->id);
-            }
-            else {
-                move_toward(enemy->id);
-            }
-            print_map(map_);
-            // end of block to remove
+            // run user script function here
 
             log_warrior(current_warrior_->name);
 
@@ -377,9 +395,7 @@ void game_start()
         }
     }
 
-    cJSON *json_fight = log_fight();
-    char *json = cJSON_Print(json_fight);
-    printf("json: %s\n", json);
+    return log_fight();
 }
 
 int **map_init()
@@ -398,7 +414,168 @@ void update_map(int **map, Warrior *warrior, Node *node)
     map[node->x][node->y] = warrior->id;
     warrior->cell = cell_init(node->x, node->y);
     warrior->moves--;
+}
 
+unsigned short has_wall_as_neighbor(Cell *cell, int **map)
+{
+    Node *current = node_init(cell->x, cell->y, cell_is_obstacle(cell), cell_is_entity(cell));
+    Nodes *graph = convert_grid_to_nodes(map, MAP_SIZE, MAP_SIZE);
+    Nodes *neighbors = neighbors_of(current, graph, DIRECTION_WITH_DIAGONALS);
+
+    for (int i = 0; i < WITH_DIAGONALS_NEIGHBORS_LENGTH; ++i) {
+        if (neighbors->items[i]->is_obstacle) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+Nodes *get_walls_of(Cell *cell, int **map)
+{
+    Node *current = node_init(cell->x, cell->y, cell_is_obstacle(cell), cell_is_entity(cell));
+    Nodes *graph = convert_grid_to_nodes(map, MAP_SIZE, MAP_SIZE);
+    Nodes *neighbors = neighbors_of(current, graph, DIRECTION_WITH_DIAGONALS);
+
+    Nodes *walls = nodes_init();
+
+    for (int i = 0; i < WITH_DIAGONALS_NEIGHBORS_LENGTH; ++i) {
+        if (neighbors->items[i]->is_obstacle) {
+            nodes_push_back(walls, neighbors->items[i]);
+        }
+    }
+
+    return walls;
+}
+
+unsigned short is_wall_between(Cell *wall, Cell *a, Cell *b)
+{
+    if (is_wall_horizontally_between(wall, a, b)
+        ||
+        is_wall_horizontally_between(wall, b, a)
+        ||
+        is_wall_vertically_between(wall, a, b)
+        ||
+        is_wall_vertically_between(wall, b, a)
+        ||
+        is_wall_diagonally_between(wall, a, b)
+        ||
+        are_symmetrical_from(wall, a, b))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+unsigned short are_horizontally_aligned(Cell *a, Cell *b)
+{
+    return a->x == b->x;
+}
+
+unsigned short are_vertically_aligned(Cell *a, Cell *b)
+{
+    return a->y == b->y;
+}
+
+unsigned short is_wall_vertically_between(Cell *wall, Cell *a, Cell *b)
+{
+    if (are_vertically_aligned(a, wall)) {
+        if ((are_vertically_aligned(wall, b))
+            ||
+        (abs((int)wall->y - (int)b->y) == 1 && get_distance_between(a, wall) < get_distance_between(wall, b))
+            ||
+        (get_distance_between(a, wall) == 1 && are_diagonally_aligned(wall, b)))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+unsigned short is_wall_horizontally_between(Cell *wall, Cell *a, Cell *b)
+{
+    if (are_horizontally_aligned(a, wall)) {
+        if ((are_horizontally_aligned(wall, b))
+            ||
+        (abs((int)wall->x - (int)b->x) == 1 && get_distance_between(a, wall) > get_distance_between(wall, b))
+            ||
+        (get_distance_between(a, wall) == 1 && are_diagonally_aligned(wall, b)))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+Cells *get_diagonal_cells_from(Cell *from, Cell *direction)
+{
+    Cells *cells = cells_init();
+    Cell *current = cell_init(from->x, from->y);
+
+    while (current->x > 0 && current->x < MAP_SIZE && current->y > 0 && current->y < MAP_SIZE) {
+        current->x += direction->x;
+        current->y += direction->y;
+
+        cells_push_back(cells, current);
+    }
+
+    return cells;
+}
+
+unsigned short cells_contains(Cells *cells, Cell *cell)
+{
+    if (cells == NULL || cell == NULL) {
+        return 0;
+    }
+
+    Cell *current;
+
+    for (int i = 0; i < cells->length; ++i) {
+        current = cells->items[i];
+
+        if (current->x == cell->x && current->y == cell->y) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+unsigned short are_diagonally_aligned(Cell *a, Cell *b)
+{
+    Cell *direction = get_direction_between(a, b);
+    Cells *diagonal = get_diagonal_cells_from(a, direction);
+
+    if (cells_contains(diagonal, b)) {
+        return 1;
+    }
+
+    return 0;
+}
+
+unsigned short are_symmetrical_from(Cell *wall, Cell *a, Cell *b)
+{
+    return ((abs((int)a->x - (int)wall->x) == abs((int)wall->x - (int)b->x)
+            && !are_vertically_aligned(b, wall))
+        || (abs((int)a->y - (int)wall->y) == abs((int)wall->y - (int)b->y)
+            && !are_horizontally_aligned(b, wall)));
+}
+
+unsigned short is_wall_diagonally_between(Cell *wall, Cell *a, Cell *b)
+{
+    Cell *direction = get_direction_between(a, b);
+    Cells *diagonal = get_diagonal_cells_from(a, direction);
+
+    if (cells_contains(diagonal, b) && cells_contains(diagonal, wall)) {
+        if ((a->x < wall->x && b->x > wall->x) || (a->x > wall->x && b->x < wall->x)) {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 void free_map(int **map)
@@ -442,8 +619,17 @@ int **generate_random_map()
     }
 
     generate_walls_on_map(&map);
+    no_walls_in_corners(&map);
 
     return map;
+}
+
+void no_walls_in_corners(int ***map)
+{
+    (*map)[0][0] = 0;
+    (*map)[0][MAP_SIZE - 1] = 0;
+    (*map)[MAP_SIZE - 1][0] = 0;
+    (*map)[MAP_SIZE - 1][MAP_SIZE - 1] = 0;
 }
 
 void generate_walls_on_map(int ***map)
@@ -506,6 +692,11 @@ void print_warrior(Warrior *warrior)
     printf("  health: %u\n", warrior->health);
     printf("  moves: %u\n", warrior->moves);
     printf("  actions: %u\n", warrior->actions);
+    printf("  weapon:\n");
+    printf("    id: %u\n", warrior->weapon->id);
+    printf("    level: %u\n", warrior->weapon->level);
+    printf("    cost: %u\n", warrior->weapon->cost);
+    printf("    damage: %u\n", warrior->weapon->damage);
 }
 
 void print_warriors(Warrior **warriors, size_t length)
@@ -542,13 +733,27 @@ void log_movements_action(cJSON *json_path)
     log_warrior_action(json_action);
 }
 
-cJSON *log_attack_action(size_t weapon_id)
+void log_attack_action(size_t weapon_id, size_t cost)
 {
     cJSON *json_action = cJSON_CreateObject();
     cJSON_AddStringToObject(json_action, "type", "attack");
+    cJSON *json_attack_result = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json_attack_result, "id", weapon_id);
+    cJSON *weapon_cost = cJSON_CreateNumber(cost);
+    cJSON_AddItemToObject(json_attack_result, "cost", weapon_cost);
+
+    cJSON_AddItemToObject(json_action, "weapon", json_attack_result);
+
+    log_warrior_action(json_action);
+}
+
+void log_equip_weapon_action(size_t weapon_id)
+{
+    cJSON *json_action = cJSON_CreateObject();
+    cJSON_AddStringToObject(json_action, "type", "equip");
     cJSON_AddNumberToObject(json_action, "weapon", weapon_id);
 
-    return json_action;
+    log_warrior_action(json_action);
 }
 
 void log_warrior_action(cJSON *warrior_action)

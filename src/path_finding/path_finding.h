@@ -6,6 +6,9 @@
 
 #define DIRECTION_NO_DIAGONALS 0
 #define DIRECTION_WITH_DIAGONALS 1
+#define NO_DIAGONALS_NEIGHBORS_LENGTH 4
+#define WITH_DIAGONALS_NEIGHBORS_LENGTH 8
+
 
 typedef struct direction_t Direction;
 typedef struct directions_t Directions;
