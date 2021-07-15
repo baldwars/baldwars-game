@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "game.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "../scripts/scripts.h"
 #include "../path_finding/path_finding.h"
 
 
@@ -404,6 +403,17 @@ void reset_warrior_action_stats(Warrior *warrior, size_t moves, size_t actions)
     warrior->actions = actions;
 }
 
+Warrior *get_winner(Warriors *warriors)
+{
+    Warrior *warrior1 = warriors->items[0];
+    Warrior *warrior2 = warriors->items[1];
+
+    Warrior *survivor = (warrior1->health > warrior2->health) ? warrior1 : warrior2;
+    survivor = (warrior1->health == warrior2->health) ? NULL : survivor;
+
+    return survivor;
+}
+
 unsigned short map_is_valid(int **map)
 {
     Nodes *nodes = nodes_init();
@@ -432,8 +442,9 @@ cJSON *game_start()
     map_ = generate_map(warriors_);
 
     size_t current_round = 1;
-    size_t round_limit = 5;
+    size_t round_limit = 30;
     unsigned short fight_is_over = 0;
+    unsigned short enemy_is_dead = 0;
 
     while (!fight_is_over) {
         json_warriors_ = NULL;
@@ -444,20 +455,36 @@ cJSON *game_start()
             size_t moves = current_warrior_->moves;
             size_t actions = current_warrior_->actions;
 
-            // run user script function here
+            if (i == 0) {
+                run_script_user1();
+            }
+            else {
+                run_script_user2();
+            }
 
             log_warrior(current_warrior_->name);
             reset_warrior_action_stats(current_warrior_, moves, actions);
+
+            Warrior *enemy = (i == 0) ? get_warrior_by_id(warriors_->items[1]->id) : get_warrior_by_id(warriors_->items[0]->id);
+            if (enemy->health == 0) {
+                enemy_is_dead = 1;
+                break;
+            }
         }
 
         log_round(current_round);
 
-        if (++current_round > round_limit) {
+        if (enemy_is_dead || (++current_round > round_limit)) {
             fight_is_over = 1;
         }
     }
 
-    return log_fight();
+    Warrior *winner = get_winner(warriors_);
+
+    printf("warrior 1 health: %u\n", warriors_->items[0]->health);
+    printf("warrior 2 health: %u\n", warriors_->items[1]->health);
+
+    return log_fight(winner);
 }
 
 int **map_init()
@@ -867,9 +894,20 @@ void log_rounds(cJSON *json_round)
     cJSON_AddItemToArray(json_rounds_, json_round);
 }
 
-cJSON *log_fight()
+void log_winner(Warrior *winner, cJSON *fight)
+{
+    if (winner == NULL) {
+        cJSON_AddNullToObject(fight, "winner");
+    } else {
+        cJSON_AddNumberToObject(fight, "winner", winner->id);
+    }
+}
+
+//cJSON *log_fight()
+cJSON *log_fight(Warrior *winner)
 {
     cJSON *json_fight = cJSON_CreateObject();
+    log_winner(winner, json_fight);
     cJSON *rounds = (!json_rounds_) ? cJSON_CreateArray() : json_rounds_;
 
     cJSON_AddItemToObject(json_fight, "fight", rounds);

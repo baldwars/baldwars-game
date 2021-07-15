@@ -118,7 +118,7 @@ Warriors *warriors_init_alloc(size_t);
 void warriors_check_alloc(Warriors *);
 void warriors_push_back(Warriors *, Warrior *);
 void reset_warrior_action_stats(Warrior *, size_t, size_t);
-Warrior *get_winner(Warrior **);
+Warrior *get_winner(Warriors *);
 
 // MAP
 int **map_init();
@@ -158,7 +158,8 @@ void log_round(size_t);
 void log_warriors(cJSON *);
 void log_warrior(const char *);
 void log_warrior_action(cJSON *);
-cJSON *log_fight();
+void log_winner(Warrior *, cJSON *);
+cJSON *log_fight(Warrior *);
 
 // ACCESSORS
 int **get_map();
