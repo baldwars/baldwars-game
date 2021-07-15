@@ -2,7 +2,7 @@
 #define UNTITLED_PATH_FINDING_H
 
 #include <stdlib.h>
-#include "../utils/utils.h"
+#include "utils.h"
 
 #define DIRECTION_NO_DIAGONALS 0
 #define DIRECTION_WITH_DIAGONALS 1

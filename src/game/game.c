@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "game.h"
-#include "../scripts/scripts.h"
-#include "../path_finding/path_finding.h"
+#include "scripts.h"
+#include "path_finding.h"
 
 
 int **map_;
