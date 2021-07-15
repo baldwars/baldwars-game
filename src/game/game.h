@@ -57,7 +57,6 @@ struct warrior_t {
     const char *name;
     size_t level;
     int health;
-//    size_t health;
     size_t moves;
     size_t actions;
     Weapon *weapon;
