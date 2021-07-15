@@ -309,7 +309,7 @@ unsigned short is_in_weapon_range(Warrior *warrior, Cell *target)
     return 1;
 }
 
-Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t health, size_t moves, size_t action)
+Warrior *warrior_init(unsigned short id, const char *name, size_t level, int health, size_t moves, size_t action)
 {
     Warrior *warrior = malloc(sizeof(Warrior));
     *warrior = (Warrior){
@@ -340,7 +340,7 @@ Warrior *load_warrior(cJSON *warrior)
     size_t id_val = (size_t)cJSON_GetNumberValue(id);
     char *name_val = cJSON_GetStringValue(name);
     size_t level_val = (size_t)cJSON_GetNumberValue(level);
-    size_t health_val = (size_t)cJSON_GetNumberValue(health);
+    int health_val = (int)cJSON_GetNumberValue(health);
     size_t actions_val = (size_t)cJSON_GetNumberValue(actions);
     size_t moves_val = (size_t)cJSON_GetNumberValue(moves);
 
@@ -442,7 +442,6 @@ cJSON *game_start()
     map_ = generate_map(warriors_);
 
     size_t current_round = 1;
-    size_t round_limit = 30;
     unsigned short fight_is_over = 0;
     unsigned short enemy_is_dead = 0;
 
@@ -474,15 +473,12 @@ cJSON *game_start()
 
         log_round(current_round);
 
-        if (enemy_is_dead || (++current_round > round_limit)) {
+        if (enemy_is_dead || (++current_round > MAX_ROUND)) {
             fight_is_over = 1;
         }
     }
 
     Warrior *winner = get_winner(warriors_);
-
-    printf("warrior 1 health: %u\n", warriors_->items[0]->health);
-    printf("warrior 2 health: %u\n", warriors_->items[1]->health);
 
     return log_fight(winner);
 }
@@ -903,7 +899,6 @@ void log_winner(Warrior *winner, cJSON *fight)
     }
 }
 
-//cJSON *log_fight()
 cJSON *log_fight(Warrior *winner)
 {
     cJSON *json_fight = cJSON_CreateObject();

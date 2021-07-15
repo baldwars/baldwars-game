@@ -6,6 +6,8 @@
 #include <cJSON.h>
 #include <utils.h>
 
+#define MAX_ROUND 50
+
 #define MAP_SIZE 20
 #define WALLS_MIN_RATIO 0.2
 #define WALLS_MAX_RATIO 0.3
@@ -54,7 +56,8 @@ struct warrior_t {
     unsigned short id;
     const char *name;
     size_t level;
-    size_t health;
+    int health;
+//    size_t health;
     size_t moves;
     size_t actions;
     Weapon *weapon;
@@ -110,7 +113,7 @@ void weapons_push_back(Weapons *, Weapon *);
 unsigned short is_in_weapon_range(Warrior *, Cell *);
 
 // WARRIOR
-Warrior *warrior_init(unsigned short, const char *, size_t, size_t, size_t, size_t);
+Warrior *warrior_init(unsigned short, const char *, size_t, int, size_t, size_t);
 Warrior *load_warrior(cJSON *);
 Warriors *load_warriors();
 Warriors *warriors_init();
