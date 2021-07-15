@@ -18,7 +18,9 @@
 typedef struct cell_t Cell;
 typedef struct cells_t Cells;
 typedef struct weapon_t Weapon;
+typedef struct weapons_t Weapons;
 typedef struct warrior_t Warrior;
+typedef struct warriors_t Warriors;
 typedef struct area_t Area;
 
 struct cell_t {
@@ -42,6 +44,12 @@ struct weapon_t {
     size_t max_range;
 };
 
+struct weapons_t {
+    Weapon **items;
+    size_t length;
+    size_t capacity;
+};
+
 struct warrior_t {
     unsigned short id;
     const char *name;
@@ -51,6 +59,12 @@ struct warrior_t {
     size_t actions;
     Weapon *weapon;
     Cell *cell;
+};
+
+struct warriors_t {
+    Warrior **items;
+    size_t length;
+    size_t capacity;
 };
 
 struct area_t {
@@ -88,22 +102,31 @@ size_t get_distance_between(Cell *, Cell *);
 Weapon *weapon_init(size_t, const char *, size_t, size_t, size_t, size_t, size_t);
 Weapon *get_weapon_by_id(size_t);
 Weapon *load_weapon(cJSON *);
-Weapon **load_weapons(size_t *);
+Weapons *load_weapons();
+Weapons *weapons_init();
+Weapons *weapons_init_alloc(size_t);
+void weapons_check_alloc(Weapons *);
+void weapons_push_back(Weapons *, Weapon *);
 unsigned short is_in_weapon_range(Warrior *, Cell *);
 
 // WARRIOR
 Warrior *warrior_init(unsigned short, const char *, size_t, size_t, size_t, size_t);
 Warrior *load_warrior(cJSON *);
-Warrior **load_warriors(size_t *);
+Warriors *load_warriors();
+Warriors *warriors_init();
+Warriors *warriors_init_alloc(size_t);
+void warriors_check_alloc(Warriors *);
+void warriors_push_back(Warriors *, Warrior *);
 void reset_warrior_action_stats(Warrior *, size_t, size_t);
+Warrior *get_winner(Warrior **);
 
 // MAP
 int **map_init();
-int **generate_map(Warrior **, size_t);
+int **generate_map(Warriors *);
 int **generate_random_map();
 void generate_walls_on_map(int ***);
 void no_walls_in_corners(int ***);
-void locate_warriors_on_map(int ***, Warrior **, size_t);
+void locate_warriors_on_map(int ***, Warriors *);
 unsigned short map_is_valid(int **);
 void free_map(int **);
 void update_map(int **, Warrior *, Node *);
@@ -122,7 +145,7 @@ cJSON *game_start();
 // DISPLAY
 void print_map(int **);
 void print_warrior(Warrior *);
-void print_warriors(Warrior **, size_t);
+void print_warriors(Warriors *);
 void print_cells(Cells *);
 
 // JSON
@@ -139,11 +162,9 @@ cJSON *log_fight();
 
 // ACCESSORS
 int **get_map();
-Warrior **get_warriors();
-size_t get_warriors_number();
+Warriors *get_warriors();
 Warrior *get_current_warrior();
 Warrior *get_warrior_by_id(size_t);
-size_t get_current_round();
 
 // SEARCH
 Nodes *a_star_algorithm(int **, Warrior *, Node *);

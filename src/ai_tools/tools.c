@@ -256,19 +256,18 @@ void use_weapon(size_t target)
 size_t get_nearest_enemy()
 {
     Warrior *current_warrior = get_current_warrior();
-    Warrior **warriors = get_warriors();
-    size_t length = get_warriors_number();
+    Warriors *warriors = get_warriors();
     size_t min_distance = INT_MAX;
     size_t nearest_enemy = 0;
     size_t distance;
 
-    for (int i = 0; i < length; ++i) {
-        if (warriors[i]->id != current_warrior->id) {
-            distance = get_distance_between(warriors[i]->cell, current_warrior->cell);
+    for (int i = 0; i < warriors->length; ++i) {
+        if (warriors->items[i]->id != current_warrior->id) {
+            distance = get_distance_between(warriors->items[i]->cell, current_warrior->cell);
 
             if (min_distance > distance) {
                 min_distance = distance;
-                nearest_enemy = warriors[i]->id;
+                nearest_enemy = warriors->items[i]->id;
             }
         }
     }
