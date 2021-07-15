@@ -316,6 +316,7 @@ Warrior *warrior_init(unsigned short id, const char *name, size_t level, int hea
         .id = id,
         .name = name,
         .level = level,
+        .max_health = health,
         .health = health,
         .actions = action,
         .moves = moves,
@@ -407,9 +408,22 @@ Warrior *get_winner(Warriors *warriors)
 {
     Warrior *warrior1 = warriors->items[0];
     Warrior *warrior2 = warriors->items[1];
+    Warrior *survivor;
 
-    Warrior *survivor = (warrior1->health > warrior2->health) ? warrior1 : warrior2;
-    survivor = (warrior1->health == warrior2->health) ? NULL : survivor;
+    if ((warrior1->health == warrior1->max_health && warrior2->health == warrior2->max_health)
+            ||
+        (warrior1->health == warrior2->health))
+    {
+        survivor = NULL;
+    }
+    else if (warrior1->health > warrior2->health)
+    {
+        survivor = warrior1;
+    }
+    else
+    {
+        survivor = warrior2;
+    }
 
     return survivor;
 }

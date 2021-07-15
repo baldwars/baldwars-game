@@ -56,6 +56,7 @@ struct warrior_t {
     unsigned short id;
     const char *name;
     size_t level;
+    size_t max_health;
     int health;
     size_t moves;
     size_t actions;
