@@ -1,14 +1,14 @@
-#include "game.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "game.h"
+#include "../scripts/scripts.h"
 #include "../path_finding/path_finding.h"
+
 
 int **map_;
 Warrior *current_warrior_;
-Warrior **warriors_;
-size_t *warriors_number_;
-Weapon **weapons_;
-size_t *weapons_number_;
+Warriors *warriors_;
+Weapons *weapons_;
 
 cJSON *json_rounds_;
 cJSON *json_warriors_;
@@ -214,10 +214,10 @@ Weapon *weapon_init(size_t id, const char *name, size_t damage, size_t level,
 
 Weapon *get_weapon_by_id(size_t weapon_id)
 {
-    for (int i = 0; i < *weapons_number_; ++i) {
-        Weapon *weapon = weapons_[i];
+    for (int i = 0; i < weapons_->length; ++i) {
+        Weapon *weapon = weapons_->items[i];
         if (weapon->id == weapon_id) {
-            return weapons_[i];
+            return weapon;
         }
     }
 
@@ -247,22 +247,55 @@ Weapon *load_weapon(cJSON *weapon)
     return weapon_init(id_val, name_val, damage_val, level_val, cost_val, min_range_val, max_range_val);
 }
 
-Weapon **load_weapons(size_t *weapons_length)
+Weapons *load_weapons()
 {
     char *buffer = get_file_content("./weapons.json");
 
     cJSON *item;
     cJSON *parsed = cJSON_Parse(buffer);
-    *weapons_length = cJSON_GetArraySize(parsed);
-    Weapon **weapons = malloc(sizeof(Warrior *) * (*weapons_length));
+    size_t weapons_length = cJSON_GetArraySize(parsed);
 
-    for (int i = 0; i < *weapons_length; ++i)
+    Weapons *weapons = weapons_init();
+
+    for (int i = 0; i < weapons_length; ++i)
     {
         item = cJSON_GetArrayItem(parsed, i);
-        weapons[i] = load_weapon(item);
+        weapons_push_back(weapons, load_weapon(item));
     }
 
     return weapons;
+}
+
+Weapons *weapons_init()
+{
+    return weapons_init_alloc(1);
+}
+
+Weapons *weapons_init_alloc(size_t capacity)
+{
+    Weapons *weapons = malloc(sizeof(Weapons));
+    *weapons = (Weapons){
+            .length = 0,
+            .capacity = capacity,
+            .items = malloc(sizeof(Weapon *) * capacity),
+    };
+
+    return weapons;
+}
+
+void weapons_check_alloc(Weapons *weapons)
+{
+    if (weapons->length >= weapons->capacity)
+    {
+        weapons-> capacity += (weapons->capacity < CAPACITY_LIMIT) ? weapons->capacity : CAPACITY_LIMIT;
+        weapons->items = realloc(weapons->items, (sizeof(Weapon *) * weapons->capacity));
+    }
+}
+
+void weapons_push_back(Weapons *weapons, Weapon *value)
+{
+    weapons_check_alloc(weapons);
+    weapons->items[weapons->length++] = value;
 }
 
 unsigned short is_in_weapon_range(Warrior *warrior, Cell *target)
@@ -276,13 +309,14 @@ unsigned short is_in_weapon_range(Warrior *warrior, Cell *target)
     return 1;
 }
 
-Warrior *warrior_init(unsigned short id, const char *name, size_t level, size_t health, size_t moves, size_t action)
+Warrior *warrior_init(unsigned short id, const char *name, size_t level, int health, size_t moves, size_t action)
 {
     Warrior *warrior = malloc(sizeof(Warrior));
     *warrior = (Warrior){
         .id = id,
         .name = name,
         .level = level,
+        .max_health = health,
         .health = health,
         .actions = action,
         .moves = moves,
@@ -307,35 +341,91 @@ Warrior *load_warrior(cJSON *warrior)
     size_t id_val = (size_t)cJSON_GetNumberValue(id);
     char *name_val = cJSON_GetStringValue(name);
     size_t level_val = (size_t)cJSON_GetNumberValue(level);
-    size_t health_val = (size_t)cJSON_GetNumberValue(health);
+    int health_val = (int)cJSON_GetNumberValue(health);
     size_t actions_val = (size_t)cJSON_GetNumberValue(actions);
     size_t moves_val = (size_t)cJSON_GetNumberValue(moves);
 
     return warrior_init(id_val, name_val, level_val, health_val, moves_val, actions_val);
 }
 
-Warrior **load_warriors(size_t *warriors_length)
+Warriors *load_warriors()
 {
     char *buffer = get_file_content("./warriors.json");
 
     cJSON *item;
     cJSON *parsed = cJSON_Parse(buffer);
-    *warriors_length = cJSON_GetArraySize(parsed);
-    Warrior **warriors = malloc(sizeof(Warrior *) * (*warriors_length));
+    size_t warriors_length = cJSON_GetArraySize(parsed);
+    Warriors *warriors = warriors_init();
 
-    for (int i = 0; i < *warriors_length; ++i)
+    for (int i = 0; i < warriors_length; ++i)
     {
         item = cJSON_GetArrayItem(parsed, i);
-        warriors[i] = load_warrior(item);
+        warriors_push_back(warriors, load_warrior(item));
     }
 
     return warriors;
+}
+
+Warriors *warriors_init()
+{
+    return warriors_init_alloc(1);
+}
+
+Warriors *warriors_init_alloc(size_t capacity)
+{
+    Warriors *warriors = malloc(sizeof(Warriors));
+    *warriors = (Warriors){
+            .length = 0,
+            .capacity = capacity,
+            .items = malloc(sizeof(Warrior *) * capacity),
+    };
+
+    return warriors;
+}
+
+void warriors_check_alloc(Warriors *warriors)
+{
+    if (warriors->length >= warriors->capacity)
+    {
+        warriors-> capacity += (warriors->capacity < CAPACITY_LIMIT) ? warriors->capacity : CAPACITY_LIMIT;
+        warriors->items = realloc(warriors->items, (sizeof(Warrior *) * warriors->capacity));
+    }
+}
+
+void warriors_push_back(Warriors *warriors, Warrior *value)
+{
+    warriors_check_alloc(warriors);
+    warriors->items[warriors->length++] = value;
 }
 
 void reset_warrior_action_stats(Warrior *warrior, size_t moves, size_t actions)
 {
     warrior->moves = moves;
     warrior->actions = actions;
+}
+
+Warrior *get_winner(Warriors *warriors)
+{
+    Warrior *warrior1 = warriors->items[0];
+    Warrior *warrior2 = warriors->items[1];
+    Warrior *survivor;
+
+    if ((warrior1->health == warrior1->max_health && warrior2->health == warrior2->max_health)
+            ||
+        (warrior1->health == warrior2->health))
+    {
+        survivor = NULL;
+    }
+    else if (warrior1->health > warrior2->health)
+    {
+        survivor = warrior1;
+    }
+    else
+    {
+        survivor = warrior2;
+    }
+
+    return survivor;
 }
 
 unsigned short map_is_valid(int **map)
@@ -361,41 +451,50 @@ unsigned short map_is_valid(int **map)
 
 cJSON *game_start()
 {
-    warriors_number_ = malloc(sizeof(size_t));
-    warriors_ = load_warriors(warriors_number_);
-    weapons_number_ = malloc(sizeof(size_t));
-    weapons_ = load_weapons(weapons_number_);
-
-    map_ = generate_map(warriors_, *warriors_number_);
+    warriors_ = load_warriors();
+    weapons_ = load_weapons();
+    map_ = generate_map(warriors_);
 
     size_t current_round = 1;
-    size_t round_limit = 5;
     unsigned short fight_is_over = 0;
+    unsigned short enemy_is_dead = 0;
 
     while (!fight_is_over) {
         json_warriors_ = NULL;
-        for (int i = 0; i < *warriors_number_; ++i) {
+        for (int i = 0; i < warriors_->length; ++i) {
             json_current_warrior_actions_ = NULL;
-            current_warrior_ = warriors_[i];
+            current_warrior_ = warriors_->items[i];
 
             size_t moves = current_warrior_->moves;
             size_t actions = current_warrior_->actions;
 
-            // run user script function here
+            if (i == 0) {
+                run_script_user1();
+            }
+            else {
+                run_script_user2();
+            }
 
             log_warrior(current_warrior_->name);
-
             reset_warrior_action_stats(current_warrior_, moves, actions);
+
+            Warrior *enemy = (i == 0) ? get_warrior_by_id(warriors_->items[1]->id) : get_warrior_by_id(warriors_->items[0]->id);
+            if (enemy->health == 0) {
+                enemy_is_dead = 1;
+                break;
+            }
         }
 
         log_round(current_round);
 
-        if (++current_round > round_limit) {
+        if (enemy_is_dead || (++current_round > MAX_ROUND)) {
             fight_is_over = 1;
         }
     }
 
-    return log_fight();
+    Warrior *winner = get_winner(warriors_);
+
+    return log_fight(winner);
 }
 
 int **map_init()
@@ -587,14 +686,14 @@ void free_map(int **map)
     free(map);
 }
 
-int **generate_map(Warrior **warriors, size_t warriors_number)
+int **generate_map(Warriors *warriors)
 {
     int **map = NULL;
     unsigned short is_valid_map;
 
     do {
         map = generate_random_map();
-        locate_warriors_on_map(&map, warriors, warriors_number);
+        locate_warriors_on_map(&map, warriors);
 
         is_valid_map = map_is_valid(map);
 
@@ -650,11 +749,11 @@ void generate_walls_on_map(int ***map)
     }
 }
 
-void locate_warriors_on_map(int *** map, Warrior **warriors, size_t warriors_number)
+void locate_warriors_on_map(int *** map, Warriors *warriors)
 {
     size_t random_x, random_y;
 
-    for (int i = 0; i < warriors_number; ++i) {
+    for (int i = 0; i < warriors->length; ++i) {
         do {
             if (i % 2 == 0) {
                 random_y = rand() % MAP_SIZE / 2;
@@ -667,8 +766,8 @@ void locate_warriors_on_map(int *** map, Warrior **warriors, size_t warriors_num
             random_x = rand() % MAP_SIZE;
         } while ((*map)[random_x][random_y] == -1);
 
-        (*map)[random_x][random_y] = warriors[i]->id;
-        warriors[i]->cell = cell_init(random_x, random_y);
+        (*map)[random_x][random_y] = warriors->items[i]->id;
+        warriors->items[i]->cell = cell_init(random_x, random_y);
     }
 }
 
@@ -699,10 +798,10 @@ void print_warrior(Warrior *warrior)
     printf("    damage: %u\n", warrior->weapon->damage);
 }
 
-void print_warriors(Warrior **warriors, size_t length)
+void print_warriors(Warriors *warriors)
 {
-    for (int i = 0; i < length; ++i) {
-        print_warrior(warriors[i]);
+    for (int i = 0; i < warriors->length; ++i) {
+        print_warrior(warriors->items[i]);
         printf("\n");
     }
 }
@@ -805,9 +904,19 @@ void log_rounds(cJSON *json_round)
     cJSON_AddItemToArray(json_rounds_, json_round);
 }
 
-cJSON *log_fight()
+void log_winner(Warrior *winner, cJSON *fight)
+{
+    if (winner == NULL) {
+        cJSON_AddNullToObject(fight, "winner");
+    } else {
+        cJSON_AddNumberToObject(fight, "winner", winner->id);
+    }
+}
+
+cJSON *log_fight(Warrior *winner)
 {
     cJSON *json_fight = cJSON_CreateObject();
+    log_winner(winner, json_fight);
     cJSON *rounds = (!json_rounds_) ? cJSON_CreateArray() : json_rounds_;
 
     cJSON_AddItemToObject(json_fight, "fight", rounds);
@@ -828,22 +937,17 @@ Warrior *get_current_warrior()
 
 Warrior *get_warrior_by_id(size_t id)
 {
-    for (int i = 0; i < *warriors_number_; ++i) {
-        Warrior *warrior = warriors_[i];
+    for (int i = 0; i < warriors_->length; ++i) {
+        Warrior *warrior = warriors_->items[i];
         if (warrior->id == id) {
-            return warriors_[i];
+            return warrior;
         }
     }
 
     return NULL;
 }
 
-size_t get_warriors_number()
-{
-    return *warriors_number_;
-}
-
-Warrior **get_warriors()
+Warriors *get_warriors()
 {
     return warriors_;
 }

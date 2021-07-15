@@ -3,6 +3,11 @@
 
 #include "../game/game.h"
 
+#define WEAPON_PISTOL 1
+#define WEAPON_SHOTGUN 2
+#define WEAPON_KATANA 3
+#define WEAPON_BLASTER 4
+
 // CELLS
 Cell *get_cell();
 Cell *get_cell_of_warrior(size_t);
