@@ -249,7 +249,6 @@ Weapon *load_weapon(cJSON *weapon)
 
 Weapons *load_weapons()
 {
-//    char *buffer = get_file_content("../weapons.json");
     char *buffer = get_file_content("../src/weapons.json");
 
     cJSON *item;
@@ -351,10 +350,8 @@ Warrior *load_warrior(cJSON *warrior)
 
 Warriors *load_warriors()
 {
-//    char *buffer = get_file_content("../warriors.json");
     char *buffer = get_file_content("../src/warriors.json");
 
-    printf("buffer: %s\n", buffer);
     cJSON *parsed = cJSON_Parse(buffer);
     int warriors_length = cJSON_GetArraySize(parsed);
     Warriors *warriors = warriors_init();
@@ -412,7 +409,7 @@ Warrior *get_winner(Warriors *warriors)
     Warrior *warrior2 = warriors->items[1];
     Warrior *survivor;
 
-    if ((warrior1->health == warrior1->max_health && warrior2->health == warrior2->max_health)
+    if ((warrior1->health == (int)warrior1->max_health && warrior2->health == (int)warrior2->max_health)
             ||
         (warrior1->health == warrior2->health))
     {
@@ -453,52 +450,30 @@ unsigned short map_is_valid(int **map)
 
 cJSON *game_start()
 {
-    printf("1\n");
     warriors_ = load_warriors();
-    printf("2\n");
-
     weapons_ = load_weapons();
-    printf("3\n");
-
     map_ = generate_map(warriors_);
-    printf("4\n");
-
+    
     size_t current_round = 1;
     unsigned short fight_is_over = 0;
     unsigned short enemy_is_dead = 0;
 
     while (!fight_is_over) {
-        printf("4.%zu\n", current_round);
         json_warriors_ = NULL;
         for (size_t i = 0; i < warriors_->length; ++i) {
             json_current_warrior_actions_ = NULL;
-            printf("4.%zu.%d.1\n", current_round, i);
 
             current_warrior_ = warriors_->items[i];
-            printf("4.%zu.%d.2\n", current_round, i);
             
-
             size_t moves = current_warrior_->moves;
             size_t actions = current_warrior_->actions;
 
             if (i == 0) {
-                printf("4.%zu.%d.3\n", current_round, i);
-
-                run_script_user1();
-        
-                printf("4.%zu.%d.4\n", current_round, i);
-    
+                run_script_user1();    
             }
             else {
-                printf("4.%zu.%d.3\n", current_round, i);
-
                 run_script_user2();
-        
-                printf("4.%zu.%d.4\n", current_round, i);
             }
-
-            printf("4.%zu.%d.5\n", current_round, i);
-
 
             log_warrior(current_warrior_->name);
             reset_warrior_action_stats(current_warrior_, moves, actions);
@@ -509,7 +484,6 @@ cJSON *game_start()
                 break;
             }
         }
-        printf("4.2\n");
 
         log_round(current_round);
 
@@ -517,12 +491,9 @@ cJSON *game_start()
             fight_is_over = 1;
         }
     }
-    printf("5\n");
-
 
     Warrior *winner = get_winner(warriors_);
-    printf("6\n");
-
+    
     return log_fight(winner);
 }
 
@@ -815,7 +786,7 @@ void print_map(int **map)
 void print_warrior(Warrior *warrior)
 {
     printf("%s:\n", warrior->name);
-    printf("  id: %u\n", warrior->id);
+    printf("  id: %zu\n", warrior->id);
     printf("  level: %zu\n", warrior->level);
     printf("  health: %d\n", warrior->health);
     printf("  moves: %zu\n", warrior->moves);

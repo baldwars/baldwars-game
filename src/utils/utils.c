@@ -75,7 +75,7 @@ Nodes *nodes_reverse(Nodes *nodes)
     Nodes *reversed = nodes_init_alloc(nodes->capacity);
     size_t last_index = nodes->length - 1;
 
-    for (size_t i = last_index; i >= 0; --i) {
+    for (int i = (int)last_index; i >= 0; --i) {
         nodes_push_back(reversed, nodes->items[i]);
     }
 
@@ -428,8 +428,7 @@ char *get_file_content(char *path)
     
     char *buffer = calloc(CAPACITY_LIMIT, sizeof(char));
 
-    // fp = (path, "r");
-    errno_t error = fopen_s(&fp, path, "r");
+    fp = fopen(path, "r");
 
     fread(buffer, CAPACITY_LIMIT, 1, fp);
 
