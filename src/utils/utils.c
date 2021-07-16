@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>
 #include "utils.h"
 
 Node *node_init(size_t x, size_t y, unsigned short is_obstacle, unsigned short is_entity)
@@ -143,7 +144,7 @@ Node *nodes_dequeue(Nodes *nodes)
     return first;
 }
 
-unsigned int hash_node(Node *node)
+size_t hash_node(Node *node)
 {
     unsigned int hash = (node->y << 16) ^ node->x;
     hash %= HASH_TABLE_CAPACITY;
