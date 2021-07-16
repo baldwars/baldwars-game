@@ -3,3 +3,4 @@
 
 ### CMAKE ###
 src/cmake-build-debug
+build/

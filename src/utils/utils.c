@@ -426,7 +426,7 @@ char *get_file_content(char *path)
 {
     FILE *fp = NULL;
     
-    char *buffer = calloc(CAPACITY_LIMIT, sizeof(char));
+    char *buffer = calloc(CAPACITY_LIMIT + 1, sizeof(char));
 
     fp = fopen(path, "r");
 
