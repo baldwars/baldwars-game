@@ -3,7 +3,7 @@
 #include "game.h"
 
 int main() {
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
 
     cJSON *json_fight = game_start();
     char *json = cJSON_Print(json_fight);

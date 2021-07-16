@@ -3,10 +3,12 @@ project(BaldWars_Game C)
 
 set(CMAKE_C_STANDARD 11)
 
-include_directories(game)
-include_directories(lib)
-include_directories(utils)
-include_directories(scripts)
+include_directories(
+        game
+        lib
+        scripts
+        utils
+)
 
 add_executable(BaldWars_Game
         game/game.c

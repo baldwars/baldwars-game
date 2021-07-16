@@ -61,7 +61,7 @@ int nodes_includes(Nodes *nodes, Node *value)
         return 0;
     }
     
-    for (int i = 0; i < nodes->length; ++i) {
+    for (size_t i = 0; i < nodes->length; ++i) {
         Node *node = nodes->items[i];
 
         if (nodes_are_equals(node, value))
@@ -75,7 +75,7 @@ Nodes *nodes_reverse(Nodes *nodes)
     Nodes *reversed = nodes_init_alloc(nodes->capacity);
     size_t last_index = nodes->length - 1;
 
-    for (int i = (int)last_index; i >= 0; --i) {
+    for (size_t i = last_index; i >= 0; --i) {
         nodes_push_back(reversed, nodes->items[i]);
     }
 
@@ -84,7 +84,7 @@ Nodes *nodes_reverse(Nodes *nodes)
 
 int nodes_index_of(Nodes *nodes, size_t x, size_t y)
 {
-    for (int i = 0; i < nodes->length; ++i) {
+    for (int i = 0; i < (int)nodes->length; ++i) {
         if (nodes->items[i]->x == x && nodes->items[i]->y == y)
             return i;
     }
@@ -95,8 +95,8 @@ int nodes_index_of(Nodes *nodes, size_t x, size_t y)
 Nodes *convert_grid_to_nodes(int **grid, size_t rows, size_t columns)
 {
     Nodes *nodes = nodes_init();
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < columns; ++j) {
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < columns; ++j) {
             Node *node;
             if (grid[i][j] == 0) {
                 node = node_init(i, j, 0, 0);
@@ -120,9 +120,9 @@ Nodes *convert_grid_to_nodes(int **grid, size_t rows, size_t columns)
 void print_nodes(Nodes *nodes)
 {
     printf("nodes: \n[\n");
-    for (int i = 0; i < nodes->length; ++i) {
+    for (size_t i = 0; i < nodes->length; ++i) {
         Node *node = nodes->items[i];
-        printf("  { x: %lu, y: %lu , is_obstacle: %hu, is_entity: %hu }\n",
+        printf("  { x: %zu, y: %zu , is_obstacle: %hu, is_entity: %hu }\n",
                node->x, node->y, node->is_obstacle, node->is_entity);
     }
     printf("]\n");
@@ -142,13 +142,13 @@ Node *nodes_dequeue(Nodes *nodes)
     Node *first = nodes->items[0];
     nodes->length--;
 
-    for (int i = 0; i < nodes->length; ++i)
+    for (size_t i = 0; i < nodes->length; ++i)
         nodes->items[i] = nodes->items[i + 1];
 
     return first;
 }
 
-size_t hash_node(Node *node)
+unsigned int hash_node(Node *node)
 {
     unsigned int hash = (node->y << 16) ^ node->x;
     hash %= HASH_TABLE_CAPACITY;
@@ -283,12 +283,12 @@ void print_nodes_hash_table(HashTable *hash_table)
             Node *key = entry->key;
             if (entry->value == NULL)
             {
-                printf("{ %lu, %lu, %hu, %hu } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
+                printf("{ %zu, %zu, %hu, %hu } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
             }
             else
             {
                 Node *value = (Node *)entry->value;
-                printf("{ %lu, %lu, %hu, %hu } = { %lu, %lu, %hu, %hu } ",
+                printf("{ %zu, %zu, %hu, %hu } = { %zu, %zu, %hu, %hu } ",
                        key->x, key->y, key->is_obstacle, key->is_entity,
                        value->x, value->y, value->is_obstacle, value->is_entity);
             }
@@ -320,12 +320,12 @@ void print_int_hash_table(HashTable *hash_table)
             Node *key = entry->key;
             if (entry->value == NULL)
             {
-                printf("{ %lu, %lu, %hu, %hu } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
+                printf("{ %zu, %zu, %hu, %hu } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
             }
             else
             {
                 int *value = (int *)entry->value;
-                printf("{ %lu, %lu, %hu, %hu } = %d\n",
+                printf("{ %zu, %zu, %hu, %hu } = %d\n",
                        key->x, key->y, key->is_obstacle, key->is_entity, *value);
             }
 
@@ -384,12 +384,12 @@ int priority_queue_peek(PriorityQueue *queue)
     size_t lowest_priority = INT_MAX;
     int index = -1;
 
-    for (int i = 0; i < queue->length; ++i) {
+    for (size_t i = 0; i < queue->length; ++i) {
         PQItem *item_i = queue->items[i];
         if ((lowest_priority == item_i->priority && index >= 0) || (lowest_priority > item_i->priority))
         {
             lowest_priority = queue->items[i]->priority;
-            index = i;
+            index = (int)i;
         }
     }
 
@@ -428,7 +428,8 @@ char *get_file_content(char *path)
     
     char *buffer = calloc(CAPACITY_LIMIT, sizeof(char));
 
-    fp = fopen(path, "r");
+    // fp = (path, "r");
+    errno_t error = fopen_s(&fp, path, "r");
 
     fread(buffer, CAPACITY_LIMIT, 1, fp);
 

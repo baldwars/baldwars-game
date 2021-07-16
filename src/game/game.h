@@ -17,6 +17,7 @@
 #define TOP_RIGHT 1
 #define DOWN_LEFT 2
 
+typedef struct map_t Map;
 typedef struct cell_t Cell;
 typedef struct cells_t Cells;
 typedef struct weapon_t Weapon;
@@ -24,6 +25,12 @@ typedef struct weapons_t Weapons;
 typedef struct warrior_t Warrior;
 typedef struct warriors_t Warriors;
 typedef struct area_t Area;
+
+struct map_t {
+    int **items;
+    size_t length;
+    size_t capacity;
+};
 
 struct cell_t {
     size_t x;
@@ -53,7 +60,7 @@ struct weapons_t {
 };
 
 struct warrior_t {
-    unsigned short id;
+    size_t id;
     const char *name;
     size_t level;
     size_t max_health;
@@ -113,7 +120,7 @@ void weapons_push_back(Weapons *, Weapon *);
 unsigned short is_in_weapon_range(Warrior *, Cell *);
 
 // WARRIOR
-Warrior *warrior_init(unsigned short, const char *, size_t, int, size_t, size_t);
+Warrior *warrior_init(size_t, const char *, size_t, int, size_t, size_t);
 Warrior *load_warrior(cJSON *);
 Warriors *load_warriors();
 Warriors *warriors_init();

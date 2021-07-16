@@ -35,7 +35,7 @@ size_t move_toward(size_t id)
     cJSON *json_path = NULL;
     size_t moves = current_warrior->moves;
 
-    for (int i = 0; i < moves; ++i) {
+    for (size_t i = 0; i < moves; ++i) {
         Node *node = nodes_dequeue(path);
 
         if (!node || nodes_are_equals(node, target)) {
@@ -68,7 +68,7 @@ size_t move_toward_with_moves(size_t id, size_t moves)
         moves = current_warrior->moves;
     }
 
-    for (int i = 0; i < moves; ++i) {
+    for (size_t i = 0; i < moves; ++i) {
         Node *node = nodes_dequeue(path);
 
         if (!node || nodes_are_equals(node, target)) {
@@ -113,7 +113,7 @@ size_t move_away_from(size_t id)
     cJSON *json_path = NULL;
     size_t moves = current_warrior->moves;
 
-    for (int i = 0; i < moves; ++i) {
+    for (size_t i = 0; i < moves; ++i) {
         Node *node = nodes_dequeue(path);
 
         if (!node || nodes_are_equals(node, target)) {
@@ -161,7 +161,7 @@ size_t move_away_from_with_moves(size_t id, size_t moves)
         moves = current_warrior->moves;
     }
 
-    for (int i = 0; i < moves; ++i) {
+    for (size_t i = 0; i < moves; ++i) {
         Node *node = nodes_dequeue(path);
 
         if (!node || nodes_are_equals(node, target)) {
@@ -262,7 +262,7 @@ size_t get_nearest_enemy()
     size_t nearest_enemy = 0;
     size_t distance;
 
-    for (int i = 0; i < warriors->length; ++i) {
+    for (size_t i = 0; i < warriors->length; ++i) {
         if (warriors->items[i]->id != current_warrior->id) {
             distance = get_distance_between(warriors->items[i]->cell, current_warrior->cell);
 

@@ -63,7 +63,7 @@ Nodes *nodes_reverse(Nodes *);
 
 // UTIL
 Nodes *convert_grid_to_nodes(int **, size_t, size_t);
-size_t hash_node(Node *);
+unsigned int hash_node(Node *);
 
 // HASH TABLE
 Entry *entry_init(Node *, void *);

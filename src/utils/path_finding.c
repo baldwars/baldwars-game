@@ -17,7 +17,7 @@ HashTable *breadth_first_search(Nodes *graph, Node *start, Node *goal)
         }
 
         Nodes *neighbors = neighbors_of(current, graph, DIRECTION_NO_DIAGONALS);
-        for (int i = 0; i < neighbors->length; ++i)
+        for (size_t i = 0; i < neighbors->length; ++i)
         {
             Node *neighbor = neighbors->items[i];
             if (hash_table_get_entry_value_by_key(came_from, neighbor) == NULL)
@@ -50,7 +50,7 @@ void dijkstra_search(Nodes *graph, Node *start, Node *goal, HashTable *came_from
         }
 
         Nodes *neighbors = neighbors_of(current, graph, DIRECTION_NO_DIAGONALS);
-        for (int i = 0; i < neighbors->length; ++i) {
+        for (size_t i = 0; i < neighbors->length; ++i) {
             Node *neighbor = neighbors->items[i];
             int *current_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, current);
             int *neighbor_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, neighbor);
@@ -87,7 +87,7 @@ void a_star_search(Nodes *graph, Node *start, Node *goal, HashTable *came_from, 
         int *current_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, current);
         Nodes *neighbors = neighbors_of(current, graph, DIRECTION_NO_DIAGONALS);
 
-        for (int i = 0; i < neighbors->length; ++i) {
+        for (size_t i = 0; i < neighbors->length; ++i) {
             Node *neighbor = neighbors->items[i];
             int *neighbor_cost = (int *)hash_table_get_entry_value_by_key(cost_so_far, neighbor);
             int new_cost = *current_cost + 1;
@@ -131,7 +131,7 @@ Nodes *neighbors_of(Node *origin, Nodes *nodes, unsigned short include_diagonals
     Directions *directions = get_directions(include_diagonals);
     Nodes *neighbors = nodes_init();
 
-    for (int i = 0; i < directions->length; ++i)
+    for (size_t i = 0; i < directions->length; ++i)
     {
         int x = (int)origin->x + directions->items[i]->x;
         int y = (int)origin->y + directions->items[i]->y;
