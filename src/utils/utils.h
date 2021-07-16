@@ -88,6 +88,7 @@ Node *priority_queue_dequeue(PriorityQueue *);
 unsigned short priority_queue_is_empty(PriorityQueue *);
 
 // FILE
-char *get_file_content(char * path);
+char *get_file_content(char *);
+char *no_space(const char *);
 
 #endif //UNTITLED_UTILS_H

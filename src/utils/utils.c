@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <limits.h>
+#include <string.h>
+#include <ctype.h>
 #include "utils.h"
 
 Node *node_init(size_t x, size_t y, unsigned short is_obstacle, unsigned short is_entity)
@@ -435,4 +437,22 @@ char *get_file_content(char *path)
     fclose(fp);
 
     return buffer;
+}
+
+char *no_space(const char *json)
+{
+    char *c = json;
+    size_t len = strlen(json);
+    char *pretty = calloc(len, sizeof(char));
+    size_t pretty_index = 0;
+
+    for (size_t i = 0; i < len; i++, c++)
+    {
+        if (isspace(*c) == 0) {
+            pretty[pretty_index] = *c;
+            pretty_index++;
+        }
+    }
+
+    return pretty;
 }
