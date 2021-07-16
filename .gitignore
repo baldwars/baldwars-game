@@ -4,3 +4,6 @@
 ### CMAKE ###
 src/cmake-build-debug
 build/
+
+### VSCODE ###
+.vscode/
