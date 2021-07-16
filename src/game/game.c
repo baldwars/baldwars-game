@@ -249,7 +249,7 @@ Weapon *load_weapon(cJSON *weapon)
 
 Weapons *load_weapons()
 {
-    char *buffer = get_file_content("../src/weapons.json");
+    char *buffer = get_file_content("../resources/weapons.json");
 
     cJSON *item;
     cJSON *parsed = cJSON_Parse(buffer);
@@ -350,7 +350,7 @@ Warrior *load_warrior(cJSON *warrior)
 
 Warriors *load_warriors()
 {
-    char *buffer = get_file_content("../src/warriors.json");
+    char *buffer = get_file_content("../resources/warriors.json");
 
     cJSON *parsed = cJSON_Parse(buffer);
     int warriors_length = cJSON_GetArraySize(parsed);
