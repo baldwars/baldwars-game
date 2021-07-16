@@ -3,6 +3,11 @@ project(BaldWars_Game C)
 
 set(CMAKE_C_STANDARD 11)
 
+add_compile_options(
+  "-Wall" "-Wpedantic" "-Wextra" "-fexceptions"
+  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
+)
+
 include_directories(
         game
         lib
