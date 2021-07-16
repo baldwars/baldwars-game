@@ -3,8 +3,8 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
-#include <cJSON.h>
-#include <utils.h>
+#include "../lib/cJSON.h"
+#include "../utils/utils.h"
 
 #define MAX_ROUND 50
 

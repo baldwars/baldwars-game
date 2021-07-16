@@ -57,6 +57,10 @@ unsigned short nodes_are_equals(Node *a, Node *b)
 
 int nodes_includes(Nodes *nodes, Node *value)
 {
+    if (nodes == NULL) {
+        return 0;
+    }
+    
     for (int i = 0; i < nodes->length; ++i) {
         Node *node = nodes->items[i];
 

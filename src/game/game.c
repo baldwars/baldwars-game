@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "game.h"
-#include "scripts.h"
-#include "path_finding.h"
+#include "../scripts/scripts.h"
+#include "../utils/path_finding.h"
 
 
 int **map_;
@@ -451,29 +451,52 @@ unsigned short map_is_valid(int **map)
 
 cJSON *game_start()
 {
+    printf("1\n");
     warriors_ = load_warriors();
+    printf("2\n");
+
     weapons_ = load_weapons();
+    printf("3\n");
+
     map_ = generate_map(warriors_);
+    printf("4\n");
 
     size_t current_round = 1;
     unsigned short fight_is_over = 0;
     unsigned short enemy_is_dead = 0;
 
     while (!fight_is_over) {
+        printf("4.%lu\n", current_round);
         json_warriors_ = NULL;
         for (int i = 0; i < warriors_->length; ++i) {
             json_current_warrior_actions_ = NULL;
+            printf("4.%lu.%d.1\n", current_round, i);
+
             current_warrior_ = warriors_->items[i];
+            printf("4.%lu.%d.2\n", current_round, i);
+            
 
             size_t moves = current_warrior_->moves;
             size_t actions = current_warrior_->actions;
 
             if (i == 0) {
+                printf("4.%lu.%d.3\n", current_round, i);
+
                 run_script_user1();
+        
+                printf("4.%lu.%d.4\n", current_round, i);
+    
             }
             else {
+                printf("4.%lu.%d.3\n", current_round, i);
+
                 run_script_user2();
+        
+                printf("4.%lu.%d.4\n", current_round, i);
             }
+
+            printf("4.%lu.%d.5\n", current_round, i);
+
 
             log_warrior(current_warrior_->name);
             reset_warrior_action_stats(current_warrior_, moves, actions);
@@ -484,6 +507,7 @@ cJSON *game_start()
                 break;
             }
         }
+        printf("4.2\n");
 
         log_round(current_round);
 
@@ -491,8 +515,11 @@ cJSON *game_start()
             fight_is_over = 1;
         }
     }
+    printf("5\n");
+
 
     Warrior *winner = get_winner(warriors_);
+    printf("6\n");
 
     return log_fight(winner);
 }
