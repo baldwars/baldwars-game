@@ -118,7 +118,7 @@ void print_nodes(Nodes *nodes)
     printf("nodes: \n[\n");
     for (int i = 0; i < nodes->length; ++i) {
         Node *node = nodes->items[i];
-        printf("  { x: %d, y: %d , is_obstacle: %d, is_entity: %d }\n",
+        printf("  { x: %lu, y: %lu , is_obstacle: %hu, is_entity: %hu }\n",
                node->x, node->y, node->is_obstacle, node->is_entity);
     }
     printf("]\n");
@@ -279,12 +279,12 @@ void print_nodes_hash_table(HashTable *hash_table)
             Node *key = entry->key;
             if (entry->value == NULL)
             {
-                printf("{ %d, %d, %d, %d } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
+                printf("{ %lu, %lu, %hu, %hu } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
             }
             else
             {
                 Node *value = (Node *)entry->value;
-                printf("{ %d, %d, %d, %d } = { %d, %d, %hu, %hu } ",
+                printf("{ %lu, %lu, %hu, %hu } = { %lu, %lu, %hu, %hu } ",
                        key->x, key->y, key->is_obstacle, key->is_entity,
                        value->x, value->y, value->is_obstacle, value->is_entity);
             }
@@ -316,12 +316,12 @@ void print_int_hash_table(HashTable *hash_table)
             Node *key = entry->key;
             if (entry->value == NULL)
             {
-                printf("{ %d, %d, %d, %d } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
+                printf("{ %lu, %lu, %hu, %hu } = NULL", key->x, key->y, key->is_obstacle, key->is_entity);
             }
             else
             {
                 int *value = (int *)entry->value;
-                printf("{ %d, %d, %d, %d } = %d\n",
+                printf("{ %lu, %lu, %hu, %hu } = %d\n",
                        key->x, key->y, key->is_obstacle, key->is_entity, *value);
             }
 
@@ -418,14 +418,16 @@ unsigned short priority_queue_is_empty(PriorityQueue *queue)
     return queue->length == 0;
 }
 
-char *get_file_content(char * path)
+char *get_file_content(char *path)
 {
-    FILE *fp;
-
+    FILE *fp = NULL;
+    
     char *buffer = calloc(CAPACITY_LIMIT, sizeof(char));
 
-    fp = fopen(path,"r");
+    fp = fopen(path, "r");
+
     fread(buffer, CAPACITY_LIMIT, 1, fp);
+
     fclose(fp);
 
     return buffer;

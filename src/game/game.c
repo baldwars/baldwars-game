@@ -185,10 +185,10 @@ void print_cells(Cells *cells)
     for (int i = 0; i < cells->length; ++i) {
         Cell *cell = cells->items[i];
         if (i == cells->length - 1) {
-            printf("{ %u ; %u }", cell->x, cell->y);
+            printf("{ %lu ; %lu }", cell->x, cell->y);
         }
         else {
-            printf("{ %u ; %u }, ", cell->x, cell->y);
+            printf("{ %lu ; %lu }, ", cell->x, cell->y);
         }
     }
     printf(" ]\n");
@@ -249,7 +249,7 @@ Weapon *load_weapon(cJSON *weapon)
 
 Weapons *load_weapons()
 {
-    char *buffer = get_file_content("./weapons.json");
+    char *buffer = get_file_content("../src/weapons.json");
 
     cJSON *item;
     cJSON *parsed = cJSON_Parse(buffer);
@@ -350,7 +350,7 @@ Warrior *load_warrior(cJSON *warrior)
 
 Warriors *load_warriors()
 {
-    char *buffer = get_file_content("./warriors.json");
+    char *buffer = get_file_content("../src/warriors.json");
 
     cJSON *item;
     cJSON *parsed = cJSON_Parse(buffer);
@@ -787,15 +787,15 @@ void print_warrior(Warrior *warrior)
 {
     printf("%s:\n", warrior->name);
     printf("  id: %u\n", warrior->id);
-    printf("  level: %u\n", warrior->level);
-    printf("  health: %u\n", warrior->health);
-    printf("  moves: %u\n", warrior->moves);
-    printf("  actions: %u\n", warrior->actions);
+    printf("  level: %lu\n", warrior->level);
+    printf("  health: %d\n", warrior->health);
+    printf("  moves: %lu\n", warrior->moves);
+    printf("  actions: %lu\n", warrior->actions);
     printf("  weapon:\n");
-    printf("    id: %u\n", warrior->weapon->id);
-    printf("    level: %u\n", warrior->weapon->level);
-    printf("    cost: %u\n", warrior->weapon->cost);
-    printf("    damage: %u\n", warrior->weapon->damage);
+    printf("    id: %lu\n", warrior->weapon->id);
+    printf("    level: %lu\n", warrior->weapon->level);
+    printf("    cost: %lu\n", warrior->weapon->cost);
+    printf("    damage: %lu\n", warrior->weapon->damage);
 }
 
 void print_warriors(Warriors *warriors)
