@@ -439,7 +439,7 @@ char *get_file_content(char *path)
     return buffer;
 }
 
-char *no_space(const char *json)
+char *no_space(char *json)
 {
     char *c = json;
     size_t len = strlen(json);
