@@ -89,6 +89,6 @@ unsigned short priority_queue_is_empty(PriorityQueue *);
 
 // FILE
 char *get_file_content(char *);
-char *no_space(const char *);
+char *no_space(char *);
 
 #endif //UNTITLED_UTILS_H
