@@ -247,9 +247,9 @@ Weapon *load_weapon(cJSON *weapon)
     return weapon_init(id_val, name_val, damage_val, level_val, cost_val, min_range_val, max_range_val);
 }
 
-Weapons *load_weapons()
+Weapons *load_weapons(char *file_name)
 {
-    char *buffer = get_file_content("../resources/weapons.json");
+    char *buffer = get_file_content(file_name);
 
     cJSON *item;
     cJSON *parsed = cJSON_Parse(buffer);
@@ -451,7 +451,7 @@ unsigned short map_is_valid(int **map)
 cJSON *game_start()
 {
     warriors_ = load_warriors();
-    weapons_ = load_weapons();
+    // weapons_ = load_weapons();
     map_ = generate_map(warriors_);
     
     size_t current_round = 1;
@@ -469,9 +469,11 @@ cJSON *game_start()
             size_t actions = current_warrior_->actions;
 
             if (i == 0) {
-                run_script_user1();    
+                weapons_ = load_weapons("../resources/weapons1.json");
+                run_script_user1();
             }
             else {
+                weapons_ = load_weapons("../resources/weapons2.json");
                 run_script_user2();
             }
 

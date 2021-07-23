@@ -112,7 +112,7 @@ size_t get_distance_between(Cell *, Cell *);
 Weapon *weapon_init(size_t, const char *, size_t, size_t, size_t, size_t, size_t);
 Weapon *get_weapon_by_id(size_t);
 Weapon *load_weapon(cJSON *);
-Weapons *load_weapons();
+Weapons *load_weapons(char *);
 Weapons *weapons_init();
 Weapons *weapons_init_alloc(size_t);
 void weapons_check_alloc(Weapons *);
