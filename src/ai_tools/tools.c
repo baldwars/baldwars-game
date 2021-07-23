@@ -243,6 +243,10 @@ void use_weapon(size_t target)
     Warrior *warrior = get_current_warrior();
     Warrior *enemy = get_warrior_by_id(target);
 
+    if (enemy->health == 0) {
+        return;
+    }
+
     warrior->actions -= warrior->weapon->cost;
     enemy->health -= (int)warrior->weapon->damage;
 
