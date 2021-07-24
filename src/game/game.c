@@ -451,7 +451,6 @@ unsigned short map_is_valid(int **map)
 cJSON *game_start()
 {
     warriors_ = load_warriors();
-    // weapons_ = load_weapons();
     map_ = generate_map(warriors_);
     
     size_t current_round = 1;
@@ -481,6 +480,7 @@ cJSON *game_start()
             reset_warrior_action_stats(current_warrior_, moves, actions);
 
             Warrior *enemy = (i == 0) ? get_warrior_by_id(warriors_->items[1]->id) : get_warrior_by_id(warriors_->items[0]->id);
+
             if (enemy->health == 0) {
                 enemy_is_dead = 1;
                 break;
